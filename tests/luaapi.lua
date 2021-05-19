@@ -80,3 +80,16 @@ local function test_vector_index()
 end
 io.stdout:write('Testing vector indexing ... \r\n');
 test_vector_index();
+
+local function test_operations()
+  local vec2 = glm.vec2(16, 15);
+  local mat2 = glm.mat2(16, 15, 14, 13);
+
+  print(glm.unpack(glm.add(vec2, vec2)));
+  print(glm.unpack(glm.sub(vec2, vec2))); 
+  print(glm.unpack(glm.dot(mat2, vec2))); 
+  print(glm.unpack(glm.div(vec2, vec2)));
+  print(glm.cross(vec2, vec2)); 
+end
+io.stdout:write('Testing operation over vectors and matrices ... \r\n');
+test_operations();

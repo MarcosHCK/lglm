@@ -50,7 +50,8 @@ LGLM_INC=src/lglm.h
 OBJECTS=\
 	src/lglm.o \
 	src/constructors.o \
-	src/camera.o
+	src/camera.o \
+	src/operators.o
 
 LTOBJS := $(OBJECTS:.o=.lo)
 
@@ -65,8 +66,14 @@ $(LGLM_LIB): $(LTOBJS)
 %.o: %.c
 	$(CC) -c $< $(LUA_CFLAGS) $(CGLM_CFLAGS) $(CFLAGS) -o $@
 
+$(PACKAGE_NAME).so: $(LGLM_LIB)
+	-ln -s $(top_builddir)/.libs/lib$(PACKAGE_NAME).so $(PACKAGE_NAME).so
+
+test: $(PACKAGE_NAME).so
+	lua5.3 $(top_builddir)/tests/luaapi.lua
+
 clean:
 	rm $(OBJECTS)
 	$(LIBTOOL) --mode=clean rm -f $(LTOBJS) $(LGLM_LIB)
 
-.PHONY: all clean $(LGLM_LIB)
+.PHONY: all clean $(LGLM_LIB) $(PACKAGE_NAME).so test

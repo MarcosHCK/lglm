@@ -66,10 +66,11 @@ extern "C" {
 #endif // __cplusplus
 
 /*
- * Error reporting
+ * Internal API
  *
  */
 int _typeerror(lua_State *L, int arg, const char *tname);
+int _checklglmobject(lua_State* L, int idx, int mtype, int throw_error);
 
 /*
  * Constructors
@@ -82,6 +83,16 @@ int _vec4(lua_State* L);
 int _mat2(lua_State* L);
 int _mat3(lua_State* L);
 int _mat4(lua_State* L);
+
+/*
+ * Operators
+ *
+ */
+int _add(lua_State* L);
+int _sub(lua_State* L);
+int _dot(lua_State* L);
+int _cross(lua_State* L);
+int _div(lua_State* L);
 
 /*
  * Camera transforms

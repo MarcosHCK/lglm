@@ -24,7 +24,7 @@ void _ctor_typeerror(lua_State* L, int idx) {
   luaL_addstring(&b, "number or ");
   int mtype;
 
-  for(mtype = 0;mtype > _LGLM_TYPES;mtype++)
+  for(mtype = 0;mtype < _LGLM_TYPES;mtype++)
   {
     luaL_addstring(&b, lglm_typenames[mtype]);
     if(mtype != _LGLM_TYPES - 1)

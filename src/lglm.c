@@ -83,7 +83,7 @@ int _trowtypeerror(lua_State* L, int idx, int mtype) {
     luaL_Buffer b;
     luaL_buffinit(L, &b);
 
-    for(mtype = 0;mtype > _LGLM_TYPES;mtype++)
+    for(mtype = 0;mtype < _LGLM_TYPES;mtype++)
     {
       luaL_addstring(&b, lglm_typenames[mtype]);
       if(mtype != _LGLM_TYPES - 1)
@@ -102,7 +102,6 @@ int _trowtypeerror(lua_State* L, int idx, int mtype) {
   }
 }
 
-static
 int _checklglmobject(lua_State* L, int idx, int mtype, int throw_error) {
   void* p = lua_touserdata(L, idx);
   if(p)
@@ -503,6 +502,13 @@ const struct luaL_Reg lglm_lib[] = {
  */
   LGLM_SYMBOL(vec2) LGLM_SYMBOL(vec3) LGLM_SYMBOL(vec4)
   LGLM_SYMBOL(mat2) LGLM_SYMBOL(mat3) LGLM_SYMBOL(mat4)
+
+/*
+ * Operators
+ *
+ */
+  LGLM_SYMBOL(add) LGLM_SYMBOL(sub) LGLM_SYMBOL(dot)
+  LGLM_SYMBOL(cross) LGLM_SYMBOL(div)
 
 /*
  * Camera
