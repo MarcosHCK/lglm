@@ -490,7 +490,7 @@ return 1;
 static
 const struct luaL_Reg lglm_lib[] = {
 /*
- * Basic operators
+ * Basic operations
  *
  */
   LGLM_SYMBOL(unpack) LGLM_SYMBOL(clone)
@@ -507,15 +507,43 @@ const struct luaL_Reg lglm_lib[] = {
  * Operators
  *
  */
-  LGLM_SYMBOL(add) LGLM_SYMBOL(sub) LGLM_SYMBOL(dot)
-  LGLM_SYMBOL(cross) LGLM_SYMBOL(div)
+  LGLM_SYMBOL(add) LGLM_SYMBOL(adds)
+  LGLM_SYMBOL(sub) LGLM_SYMBOL(subs)
+  LGLM_SYMBOL(dot) LGLM_SYMBOL(cross)
+  LGLM_SYMBOL(div) LGLM_SYMBOL(divs)
+
+/*
+ * Operations
+ *
+ */
+  LGLM_SYMBOL(norm2) LGLM_SYMBOL(norm)
+  LGLM_SYMBOL(scale) LGLM_SYMBOL(scale_as)
+  LGLM_SYMBOL(negate)
+  LGLM_SYMBOL(normalize)
+  LGLM_SYMBOL(angle)
+  LGLM_SYMBOL(rotate)
+  LGLM_SYMBOL(proj)
+  LGLM_SYMBOL(center)
+  LGLM_SYMBOL(distance2) LGLM_SYMBOL(distance)
+  LGLM_SYMBOL(max) LGLM_SYMBOL(min)
+  LGLM_SYMBOL(maxv) LGLM_SYMBOL(minv)
+  LGLM_SYMBOL(ortho)
+  LGLM_SYMBOL(clamp)
+  LGLM_SYMBOL(lerp) LGLM_SYMBOL(lerpc)
+  LGLM_SYMBOL(mix) LGLM_SYMBOL(mixc)
+  LGLM_SYMBOL(step_uni)
+  LGLM_SYMBOL(step)
+  LGLM_SYMBOL(smoothstep_uni)
+  LGLM_SYMBOL(smoothstep)
+  LGLM_SYMBOL(smoothinterp)
+  LGLM_SYMBOL(smoothinterpc)
 
 /*
  * Camera
  *
  */
   LGLM_SYMBOL(frustum)
-  LGLM_SYMBOL(ortho)
+  LGLM_SYMBOL(ortho_persp)
   LGLM_SYMBOL(ortho_aabb)
   LGLM_SYMBOL(ortho_aabb_p)
   LGLM_SYMBOL(ortho_aabb_pz)

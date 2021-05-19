@@ -89,10 +89,47 @@ int _mat4(lua_State* L);
  *
  */
 int _add(lua_State* L);
+int _adds(lua_State* L);
+int _subs(lua_State* L);
 int _sub(lua_State* L);
 int _dot(lua_State* L);
 int _cross(lua_State* L);
 int _div(lua_State* L);
+int _divs(lua_State* L);
+
+/*
+ * Operations
+ *
+ */
+int _norm2(lua_State* L);
+int _norm(lua_State* L);
+int _norm_one(lua_State* L);
+int _scale(lua_State* L);
+int _scale_as(lua_State* L);
+int _negate(lua_State* L);
+int _normalize(lua_State* L);
+int _angle(lua_State* L);
+int _rotate(lua_State* L);
+int _proj(lua_State* L);
+int _center(lua_State* L);
+int _distance2(lua_State* L);
+int _distance(lua_State* L);
+int _max(lua_State* L);
+int _min(lua_State* L);
+int _maxv(lua_State* L);
+int _minv(lua_State* L);
+int _ortho(lua_State* L);
+int _clamp(lua_State* L);
+int _lerp(lua_State* L);
+int _lerpc(lua_State* L);
+int _mix(lua_State* L);
+int _mixc(lua_State* L);
+int _step_uni(lua_State* L);
+int _step(lua_State* L);
+int _smoothstep_uni(lua_State* L);
+int _smoothstep(lua_State* L);
+int _smoothinterp(lua_State* L);
+int _smoothinterpc(lua_State* L);
 
 /*
  * Camera transforms
@@ -100,7 +137,7 @@ int _div(lua_State* L);
  *
  */
 int _frustum(lua_State* L);
-int _ortho(lua_State* L);
+int _ortho_persp(lua_State* L);
 int _ortho_aabb(lua_State* L);
 int _ortho_aabb_p(lua_State* L);
 int _ortho_aabb_pz(lua_State* L);

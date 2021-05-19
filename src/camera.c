@@ -46,7 +46,7 @@ int _frustum(lua_State* L) {
 return 1;
 }
 
-int _ortho(lua_State* L) {
+int _ortho_persp(lua_State* L) {
   vec4 viewport = GLM_VEC4_BLACK_INIT;
   int idx = 1;
 

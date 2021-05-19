@@ -17,14 +17,13 @@
  */
 #include <lglm_luaapi.h>
 
-static
-void _only_vectors_error(lua_State* L, int idx, int top) {
+void _only_vectors_error(lua_State* L, int idx, int base, int top) {
   luaL_Buffer b;
   luaL_buffinit(L, &b);
   int mtype;
   ++top;
 
-  for(mtype = 0;mtype < top;mtype++)
+  for(mtype = base;mtype < top;mtype++)
   {
     luaL_addstring(&b, lglm_typenames[mtype]);
     if(mtype != top - 1)
@@ -88,7 +87,32 @@ int _add(lua_State* L) {
       return 1;
       break;
     default:
-      _only_vectors_error(L, 1, LUA_TVEC4);
+      _only_vectors_error(L, 1, 0, LUA_TVEC4);
+      break;
+  }
+return 0;
+}
+
+int _adds(lua_State* L) {
+  int mtype, othertype;
+  lglm_union_t *union_, *union1 =
+  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  float scalar = luaL_checknumber(L, 2);
+
+  switch(mtype)
+  {
+    case LUA_TVEC2:
+      union_ = lua_newlglmobject(L, mtype);
+      glm_vec2_adds(union1->vec2_, scalar, union_->vec2_);
+      return 1;
+    case LUA_TVEC3:
+      union_ = lua_newlglmobject(L, mtype);
+      glm_vec3_adds(union1->vec3_, scalar, union_->vec3_);
+      return 1;
+    case LUA_TVEC4:
+      union_ = lua_newlglmobject(L, mtype);
+      glm_vec4_adds(union1->vec4_, scalar, union_->vec4_);
+      return 1;
       break;
   }
 return 0;
@@ -130,7 +154,32 @@ int _sub(lua_State* L) {
       return 1;
       break;
     default:
-      _only_vectors_error(L, 1, LUA_TVEC4);
+      _only_vectors_error(L, 1, 0, LUA_TVEC4);
+      break;
+  }
+return 0;
+}
+
+int _subs(lua_State* L) {
+  int mtype, othertype;
+  lglm_union_t *union_, *union1 =
+  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  float scalar = luaL_checknumber(L, 2);
+
+  switch(mtype)
+  {
+    case LUA_TVEC2:
+      union_ = lua_newlglmobject(L, mtype);
+      glm_vec2_subs(union1->vec2_, scalar, union_->vec2_);
+      return 1;
+    case LUA_TVEC3:
+      union_ = lua_newlglmobject(L, mtype);
+      glm_vec3_subs(union1->vec3_, scalar, union_->vec3_);
+      return 1;
+    case LUA_TVEC4:
+      union_ = lua_newlglmobject(L, mtype);
+      glm_vec4_subs(union1->vec4_, scalar, union_->vec4_);
+      return 1;
       break;
   }
 return 0;
@@ -275,7 +324,7 @@ int _cross(lua_State* L) {
       return 1;
       break;
     default:
-      _only_vectors_error(L, 1, LUA_TVEC3);
+      _only_vectors_error(L, 1, 0, LUA_TVEC3);
       break;
   }
 return 0;
@@ -313,7 +362,32 @@ int _div(lua_State* L) {
       return 1;
       break;
     default:
-      _only_vectors_error(L, 1, LUA_TVEC4);
+      _only_vectors_error(L, 1, 0, LUA_TVEC4);
+      break;
+  }
+return 0;
+}
+
+int _divs(lua_State* L) {
+  int mtype, othertype;
+  lglm_union_t *union_, *union1 =
+  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  float scalar = luaL_checknumber(L, 2);
+
+  switch(mtype)
+  {
+    case LUA_TVEC2:
+      union_ = lua_newlglmobject(L, mtype);
+      glm_vec2_divs(union1->vec2_, scalar, union_->vec2_);
+      return 1;
+    case LUA_TVEC3:
+      union_ = lua_newlglmobject(L, mtype);
+      glm_vec3_divs(union1->vec3_, scalar, union_->vec3_);
+      return 1;
+    case LUA_TVEC4:
+      union_ = lua_newlglmobject(L, mtype);
+      glm_vec4_divs(union1->vec4_, scalar, union_->vec4_);
+      return 1;
       break;
   }
 return 0;

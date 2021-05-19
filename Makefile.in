@@ -51,7 +51,8 @@ OBJECTS=\
 	src/lglm.o \
 	src/constructors.o \
 	src/camera.o \
-	src/operators.o
+	src/operators.o \
+	src/operations.o
 
 LTOBJS := $(OBJECTS:.o=.lo)
 
