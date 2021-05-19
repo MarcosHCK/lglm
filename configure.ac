@@ -75,8 +75,7 @@ fi
 AC_SEARCH_LIBS([pow], [m])
 
 # Check for libraries using pkg-config
-#PKG_CHECK_MODULES([LUA], [luajit-2.0 lua5.3 lua5.2 lua5.1])
-PKG_CHECK_MODULES([LUA], [luajit-2.0],,[
+PKG_CHECK_MODULES([LUA], [luajit],,[
   PKG_CHECK_MODULES([LUA], [lua5.3],, [
     PKG_CHECK_MODULES([LUA], [lua5.2],, [
       PKG_CHECK_MODULES([LUA], [lua5.1])
