@@ -151,27 +151,27 @@ int _scale(lua_State* L) {
   else
   {
     int othertype;
-    lglm_union_t *union2 = lua_checklglmobject(L, 1, LUA_TGLMANY, &othertype);
+    lglm_union_t *union2 = lua_checklglmobject(L, 2, LUA_TGLMANY, &othertype);
 
     switch(othertype)
     {
       case LUA_TVEC3:
         if(mtype != LUA_TMAT4)
-          _typeerror(L, 1, LUA_MAT4);
+          _typeerror(L, 2, LUA_MAT4);
         union_ = lua_newlglmobject(L, mtype);
         glm_scale_to(union1->mat4_, union2->vec3_, union_->mat4_);
         return 1;
         break;
       case LUA_TVEC2:
         if(mtype != LUA_TMAT3)
-          _typeerror(L, 1, LUA_MAT3);
+          _typeerror(L, 2, LUA_MAT3);
         union_ = lua_newlglmobject(L, mtype);
         glm_mat3_copy(union1->mat3_, union_->mat3_);
         glm_scale2d(union_->mat3_, union2->vec2_);
         return 1;
         break;
       default:
-        _only_vectors_error(L, 2, LUA_TVEC3, LUA_TVEC4);
+        _only_vectors_error(L, 2, LUA_TVEC2, LUA_TVEC3);
         break;
     }
   }
