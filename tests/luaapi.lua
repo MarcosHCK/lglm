@@ -16,7 +16,14 @@
 -- along with lglm.  If not, see <http://www.gnu.org/licenses/>.
 --
 ]]
+package.cpath = '.libs/lib?.so;'
 local glm = require('lglm');
+
+local function test_feature(msg, func)
+  io.stdout:write(msg .. '\r\n');
+  func();
+  io.stdout:write('\r\n');
+end
 
 local function test_constuctors()
   local vec2 = glm.vec2(16, 15);
@@ -33,15 +40,13 @@ local function test_constuctors()
   print(glm.unpack(mat3));
   print(glm.unpack(mat4));
 end
-io.stdout:write('Testing constructors ... \r\n');
-test_constuctors();
+test_feature('Testing constructors ...', test_constuctors);
 
 local function test_zero_contructor()
   local vec3 = glm.vec3();
   print(glm.unpack(vec3));
 end
-io.stdout:write('Testing zero construction ... \r\n');
-test_zero_contructor();
+test_feature('Testing zero construction ...', test_zero_contructor);
 
 local function test_matrix_from_vectors()
   local vec2 = glm.vec2(16, 15);
@@ -62,10 +67,9 @@ local function test_matrix_from_vectors()
   local mat2 = glm.mat2(1, vec2, 2);
   print(glm.unpack(mat2));
 end
-io.stdout:write('Testing matrix from vectors construction ... \r\n');
-test_matrix_from_vectors();
+test_feature('Testing matrix from vectors construction ...', test_matrix_from_vectors);
 
-local function test_vector_index()
+local function test_vector_index_getter()
   local vec2 = glm.vec2(16, 15);
   local vec3 = glm.vec3(16, 15, 14);
   local vec4 = glm.vec4(16, 15, 14, 13);
@@ -78,8 +82,38 @@ local function test_vector_index()
   print(mat4[1]);
   print(mat4[1][1]);
 end
-io.stdout:write('Testing vector indexing ... \r\n');
-test_vector_index();
+test_feature('Testing vector indexing (getter) ...', test_vector_index_getter);
+
+local function test_vector_index_setter()
+  local vec2 = glm.vec2(16, 15);
+  local vec4 = glm.vec4(16, 15, 14, 13);
+
+  vec2[2] = 1;
+  vec4[4] = 2;
+
+  print(vec2.x, vec2.y, vec2.z, vec2.w);
+  print(vec4.x, vec4.y, vec4.z, vec4.w);
+
+  vec2.xzy = 8, 7;
+  vec4.wx = 8, 7;
+
+  print(vec2.x, vec2.y, vec2.z, vec2.w);
+  print(vec4.x, vec4.y, vec4.z, vec4.w);
+end
+test_feature('Testing vector indexing (setter) ...', test_vector_index_setter);
+
+local function test_vector_methods()
+  local mat4 = glm.mat4();
+  print(glm.unpack(mat4));
+  mat4:identity()
+  print(glm.unpack(mat4));
+
+  local vec2 = glm.vec2();
+  print(glm.unpack(vec2));
+  vec2:one()
+  print(glm.unpack(vec2));
+end
+test_feature('Testing vector methods ...', test_vector_methods);
 
 local function test_operations()
   local vec2 = glm.vec2(16, 15);
@@ -91,5 +125,4 @@ local function test_operations()
   print(glm.unpack(glm.div(vec2, vec2)));
   print(glm.cross(vec2, vec2)); 
 end
-io.stdout:write('Testing operation over vectors and matrices ... \r\n');
-test_operations();
+test_feature('Testing operation over vectors and matrices ...', test_operations);

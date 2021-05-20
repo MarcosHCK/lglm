@@ -251,119 +251,384 @@ const char vecindex_chars[] = {
 };
 
 static
-int _getvecindex(lua_State* L, int at, int mtype) {
-    int i, idx = 0;
-
-    if(lua_type(L, at) == LUA_TNUMBER)
+int _is_vecindex(int c) {
+  int i;
+  for(i = 0;i < sizeof(vecindex_chars);i++)
+  {
+    if(c == vecindex_chars[i])
     {
-/*
- * Array-like component access
- * vec[0]
- *
- */
-        idx = lua_tointeger(L, at);
+      return i;
     }
-    else
-    {
-/*
- * Vector component access
- * vec.x
- *
- */
-        size_t len;
-        const char* key = lua_tolstring(L, at, &len);
-
-        if(len == 1)
-        for(i = 0;i < sizeof(vecindex_chars);i++)
-        if(key[0] == vecindex_chars[i]) {
-            idx = i + 1;
-            break;
-        }
-    }
-
-    if(idx >= 1 && idx <= (mtype + 2))
-    {
-        return idx - 1;
-    }
+  }
 return -1;
 }
 
 static
 int _vector_mt__newindex(lua_State* L) {
-  if(lua_type(L, 2) == LUA_TSTRING ||
-     lua_type(L, 2) == LUA_TNUMBER &&
-     lua_type(L, 3) == LUA_TNUMBER)
-  {
-    int mtype, index;
-    lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
-    index = _getvecindex(L, 2, mtype);
+  int mtype;
+  lglm_union_t *union2, *union_ =
+  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
 
-    if(index >= 0)
+  int othertype = _checklglmobject(L, 3, LUA_TGLMANY, FALSE);
+  if(!(lua_isnumber(L, 3) || othertype != LUA_TGLMANY))
+  {
+/*
+ * Invalid value for index, wherever it is
+ *
+ */
+    return 0;
+  }
+  if(othertype != LUA_TGLMANY && mtype - othertype != 0)
+  {
+/*
+ * Can not assign a a matrix to a vector component,
+ * but a vector of similar dimensions can be assigned
+ * to a matrix column.
+ *
+ */
+    return 0;
+  }
+
+  if(lua_isnumber(L, 2))
+  {
+    int index = lua_tonumber(L, 2);
+/*
+ * Simple array-like access (ex: vec4[3] or mat2[1])
+ * note: index starts from 1 (as usual in Lua)
+ *
+ */
     switch(mtype)
     {
       case LUA_TVEC2:
-        union_->vec2_[index] = lua_tonumber(L, 3);
+        if(index >= 1 && index <= 2)
+        union_->vec2_[index - 1] = lua_tonumber(L, 3);
         break;
       case LUA_TVEC3:
-        union_->vec3_[index] = lua_tonumber(L, 3);
+        if(index >= 1 && index <= 3)
+        union_->vec3_[index - 1] = lua_tonumber(L, 3);
         break;
       case LUA_TVEC4:
-        union_->vec4_[index] = lua_tonumber(L, 3);
+        if(index >= 1 && index <= 4)
+        union_->vec4_[index - 1] = lua_tonumber(L, 3);
+        break;
+      case LUA_TMAT2:
+        if(index >= 1 && index <= 2)
+        {
+          union2 = lua_tolglmobject(L, 3, othertype);
+          glm_vec2_copy(union2->vec2_, union_->mat2_[index - 1]);
+        }
+        break;
+      case LUA_TMAT3:
+        if(index >= 1 && index <= 3)
+        {
+          union2 = lua_tolglmobject(L, 3, othertype);
+          glm_vec3_copy(union2->vec3_, union_->mat3_[index - 1]);
+        }
+        break;
+      case LUA_TMAT4:
+        if(index >= 1 && index <= 4)
+        {
+          union2 = lua_tolglmobject(L, 3, othertype);
+          glm_vec4_copy(union2->vec4_, union_->mat4_[index - 1]);
+        }
         break;
     }
+  } else
+  if(lua_isstring(L, 2))
+  {
+/*
+ * Point-like access
+ * (ex: mat4:identity() or vec3.xz)
+ *
+ */
+    size_t i, sz;
+    const char* index =
+    lua_tolstring(L, 2, &sz);
+    int c, idx = 3;
+
+    /* check if index is not a point-like access,         */
+    /* is faster then check for individual methods first  */
+    for(i = 0;i < sz;i++)
+    if(_is_vecindex(index[i]) == (-1))
+    return 0;
+
+    for(i = 0;i < sz;i++)
+    {
+      if(lua_type(L, idx) == LUA_TNONE)
+      {
+        break;
+      }
+
+      if(lua_isnil(L, idx))
+      {
+        ++idx;
+        continue;
+      }
+
+      float number = luaL_checknumber(L, idx++);
+      c = _is_vecindex(index[i]);
+
+      switch(mtype)
+      {
+        case LUA_TVEC2:
+          if(c >= 0 && c <= 1)
+          union_->vec2_[c] = number;
+          break;
+        case LUA_TVEC3:
+          if(c >= 0 && c <= 2)
+          union_->vec3_[c] = number;
+          break;
+        case LUA_TVEC4:
+          if(c >= 0 && c <= 3)
+          union_->vec4_[c] = number;
+          break;
+      }
+    }
+  }
+return 0;
+}
+
+/* from operators.c */
+void _only_vectors_error(lua_State* L, int idx, int base, int top);
+
+static
+int __vector_mt__F_identity(lua_State* L) {
+  int mtype;
+  lglm_union_t* union_ =
+  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+
+  switch(mtype)
+  {
+    case LUA_TMAT2:
+      glm_mat2_identity(union_->mat2_);
+      lua_pushvalue(L, 1);
+      return 1;
+      break;
+    case LUA_TMAT3:
+      glm_mat3_identity(union_->mat3_);
+      lua_pushvalue(L, 1);
+      return 1;
+      break;
+    case LUA_TMAT4:
+      glm_mat4_identity(union_->mat4_);
+      lua_pushvalue(L, 1);
+      return 1;
+      break;
+    default:
+      _only_vectors_error(L, 1, LUA_TMAT2, LUA_TMAT4);
+      break;
+  }
+return 0;
+}
+
+static
+int __vector_mt__F_zero(lua_State* L) {
+  int mtype;
+  lglm_union_t* union_ =
+  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+
+  switch(mtype)
+  {
+    case LUA_TVEC2:
+      glm_vec2_zero(union_->vec2_);
+      break;
+    case LUA_TVEC3:
+      glm_vec3_zero(union_->vec3_);
+      break;
+    case LUA_TVEC4:
+      glm_vec4_zero(union_->vec4_);
+      break;
+    case LUA_TMAT2:
+      glm_mat2_zero(union_->mat2_);
+      break;
+    case LUA_TMAT3:
+      glm_mat3_zero(union_->mat3_);
+      break;
+    case LUA_TMAT4:
+      glm_mat4_zero(union_->mat4_);
+      break;
+  }
+return 0;
+}
+
+static
+int __vector_mt__F_one(lua_State* L) {
+  int mtype;
+  lglm_union_t* union_ =
+  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+
+  switch(mtype)
+  {
+    case LUA_TVEC2:
+      glm_vec2_one(union_->vec2_);
+      break;
+    case LUA_TVEC3:
+      glm_vec3_one(union_->vec3_);
+      break;
+    case LUA_TVEC4:
+      glm_vec4_one(union_->vec4_);
+      break;
+    default:
+      _only_vectors_error(L, 1, 0, LUA_TVEC4);
+      break;
   }
 return 0;
 }
 
 static
 int _vector_mt__index(lua_State* L) {
-  if(lua_type(L, 2) == LUA_TSTRING ||
-     lua_type(L, 2) == LUA_TNUMBER)
+  int mtype;
+  lglm_union_t* union_ =
+  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+
+  if(lua_isnumber(L, 2))
   {
-    int mtype, index;
-    lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+/*
+ * Simple array-like access (ex: vec4[3] or mat2[1])
+ * note: index starts from 1 (as usual in Lua)
+ *
+ */
+    int index = lua_tointeger(L, 2);
 
     switch(mtype)
     {
       case LUA_TVEC2:
+        if(index >= 1 && index <= 2)
+          lua_pushnumber(L, union_->vec2_[index - 1]);
+        else
+          lua_pushnil(L);
+        return 1;
+        break;
       case LUA_TVEC3:
+        if(index >= 1 && index <= 3)
+          lua_pushnumber(L, union_->vec3_[index - 1]);
+        else
+          lua_pushnil(L);
+        return 1;
+        break;
       case LUA_TVEC4:
-        index = _getvecindex(L, 2, mtype);
-        if(index >= 0)
-        {
-          lua_pushnumber(L, union_->vec4_[index]);
-          return 1;
-        }
+        if(index >= 1 && index <= 4)
+          lua_pushnumber(L, union_->vec4_[index - 1]);
+        else
+          lua_pushnil(L);
+        return 1;
         break;
+/*
+ * TODO:
+ * I'd like matrices could be manipulated in a way like 'mat4[1][1] = 5',
+ * but I have no idea how to propagate generated vector __newindex call
+ * to its parent matrix in C (maybe an upvalue?).
+ *
+ */
       case LUA_TMAT2:
-      case LUA_TMAT3:
-      case LUA_TMAT4:
-        if(lua_type(L, 2) == LUA_TNUMBER)
+        if(index >= 1 && index <= 2)
         {
-          index = lua_tointeger(L, 2);
-          if(index >= 1 && index <= (mtype - LUA_TMAT2 + 2))
-          {
-            int newtype = mtype - LUA_TMAT2;
-            lglm_union_t* union2_ = lua_newlglmobject(L, newtype);
-            switch(newtype)
-            {
-              case LUA_TVEC2:
-                glm_vec2_copy(union_->mat2_[index - 1], union2_->vec2_);
-                break;
-              case LUA_TVEC3:
-                glm_vec3_copy(union_->mat3_[index - 1], union2_->vec3_);
-                break;
-              case LUA_TVEC4:
-                glm_vec4_copy(union_->mat4_[index - 1], union2_->vec4_);
-                break;
-              default:
-                return 0;
-                break;
-            }
-            return 1;
-          }
+          lglm_union_t* union2 = lua_newlglmobject(L, LUA_TVEC2);
+          glm_vec2_copy(union_->mat2_[index - 1], union2->vec2_);
         }
+        else
+          lua_pushnil(L);
+        return 1;
         break;
+      case LUA_TMAT3:
+        if(index >= 1 && index <= 3)
+        {
+          lglm_union_t* union2 = lua_newlglmobject(L, LUA_TVEC3);
+          glm_vec3_copy(union_->mat3_[index - 1], union2->vec3_);
+        }
+        else
+          lua_pushnil(L);
+        return 1;
+        break;
+      case LUA_TMAT4:
+        if(index >= 1 && index <= 4)
+        {
+          lglm_union_t* union2 = lua_newlglmobject(L, LUA_TVEC4);
+          glm_vec4_copy(union_->mat4_[index - 1], union2->vec4_);
+        }
+        else
+          lua_pushnil(L);
+        return 1;
+        break;
+    }
+  } else
+  if(lua_isstring(L, 2))
+  {
+/*
+ * Methods and point-like access
+ * (ex: mat4:identity() or vec3.xz)
+ *
+ */
+    size_t i, sz;
+    const char* index =
+    lua_tolstring(L, 2, &sz);
+    int point_like = TRUE;
+
+    /* check if index is not a point-like access,         */
+    /* is faster then check for individual methods first  */
+    for(i = 0;i < sz;i++)
+    if(_is_vecindex(index[i]) == (-1))
+    {
+      point_like = FALSE;
+      break;
+    }
+
+    if(point_like)
+    {
+      if(mtype >= LUA_TMAT2)
+      {
+        /* this kind of access are only available to vectors */
+        return 0;
+      }
+
+      int c, r = 0;
+      for(i = 0;i < sz;i++)
+      {
+        c = _is_vecindex(index[i]);
+        switch(mtype)
+        {
+          case LUA_TVEC2:
+            if(c >= 0 && c <= 1)
+            {
+              lua_pushnumber(L, union_->vec2_[c]);
+              ++r;
+            }
+            break;
+          case LUA_TVEC3:
+            if(c >= 0 && c <= 2)
+            {
+              lua_pushnumber(L, union_->vec3_[c]);
+              ++r;
+            }
+            break;
+          case LUA_TVEC4:
+            if(c >= 0 && c <= 3)
+            {
+              lua_pushnumber(L, union_->vec4_[c]);
+              ++r;
+            }
+            break;
+        }
+      }
+      return r;
+    } 
+    else
+    {
+      if(!strcmp(index, "identity"))
+      {
+        lua_pushcfunction(L, __vector_mt__F_identity);
+        return 1;
+      } else
+      if(!strcmp(index, "zero"))
+      {
+        lua_pushcfunction(L, __vector_mt__F_zero);
+        return 1;
+      } else
+      if(!strcmp(index, "one"))
+      {
+        lua_pushcfunction(L, __vector_mt__F_one);
+        return 1;
+      }
     }
   }
 return 0;
