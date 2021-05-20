@@ -73,6 +73,8 @@ fi
 
 # Checks for libraries.
 AC_SEARCH_LIBS([pow], [m])
+AC_SEARCH_LIBS([sqrtf], [m])
+AC_SEARCH_LIBS([fabsf], [m])
 
 # Check for libraries using pkg-config
 PKG_CHECK_MODULES([LUA], [luajit],,[
@@ -100,5 +102,5 @@ AC_CHECK_FUNCS([memcpy])
 
 # Produce output
 AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile lglm.pc])
 AC_OUTPUT

@@ -129,8 +129,20 @@ int _scale(lua_State* L) {
       glm_vec4_scale(union1->vec4_, scale, union_->vec4_);
       return 1;
       break;
-    default:
-      _only_vectors_error(L, 1, 0, LUA_TVEC4);
+    case LUA_TMAT2:
+      union_ = lua_newlglmobject(L, mtype);
+      glm_mat2_copy(union1->mat2_, union_->mat2_);
+      glm_mat2_scale(union_->mat2_, scale);
+      break;
+    case LUA_TMAT3:
+      union_ = lua_newlglmobject(L, mtype);
+      glm_mat3_copy(union1->mat3_, union_->mat3_);
+      glm_mat3_scale(union_->mat3_, scale);
+      break;
+    case LUA_TMAT4:
+      union_ = lua_newlglmobject(L, mtype);
+      glm_mat4_copy(union1->mat4_, union_->mat4_);
+      glm_mat4_scale(union_->mat4_, scale);
       break;
   }
 return 0;

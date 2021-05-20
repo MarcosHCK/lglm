@@ -52,7 +52,7 @@ enum {
 
 #define GLM_ALIGNMENT 16
 
-#pragma push(pack, 1)
+#pragma pack(push, 1)
 
 typedef struct _lglm_object lglm_object_t;
 typedef union _lglm_union lglm_union_t;
@@ -74,7 +74,7 @@ struct _lglm_object {
   uint8_t offset : 4;
 } __attribute__((packed, aligned(1)));
 
-#pragma pop(pack)
+#pragma pack(pop)
 
 #if __cplusplus
 extern "C" {

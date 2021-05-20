@@ -18,6 +18,10 @@ PACKAGE_NAME=@PACKAGE_NAME@
 top_builddir=@top_builddir@
 top_srcdir=@top_srcdir@
 srcdir=@srcdir@
+libdir=@libdir@
+exec_prefix=@exec_prefix@
+includedir=@includedir@
+prefix=@prefix@
 
 #
 # Compiler flags
@@ -35,12 +39,14 @@ LUA_CFLAGS=@LUA_CFLAGS@
 LUA_LIBS=@LUA_LIBS@
 CGLM_CFLAGS=@CGLM_CFLAGS@
 CGLM_LIBS=@CGLM_LIBS@
-SHARED_FLAGS=-rpath /usr/local/lib -shared
+SHARED_FLAGS=-shared -rpath $(libdir)
 
 #
 # Some programs we need ...
 #
 LIBTOOL=@LIBTOOL@
+INSTALL=@INSTALL@
+INSTALL_DATA=@INSTALL_DATA@
 CC=@CC@
 LD=@LD@
 
@@ -67,14 +73,27 @@ $(LGLM_LIB): $(LTOBJS)
 %.o: %.c
 	$(CC) -c $< $(LUA_CFLAGS) $(CGLM_CFLAGS) $(CFLAGS) -o $@
 
+install: $(LGLM_LIB)
+	$(INSTALL) -d $(libdir)
+	$(LIBTOOL) --mode=install $(INSTALL) $(LGLM_LIB) $(libdir)
+	$(INSTALL) -d $(includedir)
+	$(LIBTOOL) --mode=install $(INSTALL_DATA) src/lglm.h $(includedir)/lglm.h
+	$(INSTALL) -d $(libdir)/pkgconfig
+	$(LIBTOOL) --mode=install $(INSTALL_DATA) lglm.pc $(libdir)/pkgconfig/lglm.pc
+
+uninstall:
+	$(LIBTOOL) --mode=uninstall rm -f $(libdir)/$(LGLM_LIB)
+	$(LIBTOOL) --mode=uninstall rm -f $(includedir)/lglm.h
+	$(LIBTOOL) --mode=uninstall rm -f $(libdir)/pkgconfig/lglm.pc
+
 $(PACKAGE_NAME).so: $(LGLM_LIB)
 	-ln -s $(top_builddir)/.libs/lib$(PACKAGE_NAME).so $(PACKAGE_NAME).so
 
 test: $(PACKAGE_NAME).so
-	lua5.3 $(top_builddir)/tests/luaapi.lua
+	luajit $(top_builddir)/tests/luaapi.lua
 
 clean:
 	rm $(OBJECTS)
 	$(LIBTOOL) --mode=clean rm -f $(LTOBJS) $(LGLM_LIB)
 
-.PHONY: all clean $(LGLM_LIB) $(PACKAGE_NAME).so test
+.PHONY: all clean $(LGLM_LIB) $(PACKAGE_NAME).so test install uninstall
