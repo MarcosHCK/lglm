@@ -36,6 +36,13 @@ return 0;
 }
 
 static
+int _vector_mt__name(lua_State* L) {
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lua_pushstring(L, lglm_typenames[mtype]);
+return 1;
+}
+
+static
 const char vecindex_chars[] = {
     'x', 'y', 'z', 'w'
 };
@@ -429,6 +436,7 @@ return 0;
 static
 const luaL_Reg vector_mt[] = {
   {"__tostring", _vector_mt__tostring},
+  {"__name", _vector_mt__name},
   {"__newindex", _vector_mt__newindex},
   {"__index", _vector_mt__index},
   {NULL, NULL},
