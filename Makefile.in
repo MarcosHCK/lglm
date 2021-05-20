@@ -55,10 +55,13 @@ LGLM_INC=src/lglm.h
 
 OBJECTS=\
 	src/lglm.o \
+	src/lglm_meta.o \
 	src/constructors.o \
-	src/camera.o \
 	src/operators.o \
-	src/operations.o
+	src/operations.o \
+	src/affine.o \
+	src/camera.o \
+	src/versor.o
 
 LTOBJS := $(OBJECTS:.o=.lo)
 

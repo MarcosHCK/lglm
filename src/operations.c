@@ -111,39 +111,69 @@ return 0;
 int _scale(lua_State* L) {
   int mtype;
   lglm_union_t *union_, *union1 = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
-  float scale = luaL_checknumber(L, 2);
-  switch(mtype) 
+  if(lua_isnumber(L, 2))
   {
-    case LUA_TVEC2:
-      union_ = lua_newlglmobject(L, mtype);
-      glm_vec2_scale(union1->vec2_, scale, union_->vec2_);
-      return 1;
-      break;
-    case LUA_TVEC3:
-      union_ = lua_newlglmobject(L, mtype);
-      glm_vec3_scale(union1->vec3_, scale, union_->vec3_);
-      return 1;
-      break;
-    case LUA_TVEC4:
-      union_ = lua_newlglmobject(L, mtype);
-      glm_vec4_scale(union1->vec4_, scale, union_->vec4_);
-      return 1;
-      break;
-    case LUA_TMAT2:
-      union_ = lua_newlglmobject(L, mtype);
-      glm_mat2_copy(union1->mat2_, union_->mat2_);
-      glm_mat2_scale(union_->mat2_, scale);
-      break;
-    case LUA_TMAT3:
-      union_ = lua_newlglmobject(L, mtype);
-      glm_mat3_copy(union1->mat3_, union_->mat3_);
-      glm_mat3_scale(union_->mat3_, scale);
-      break;
-    case LUA_TMAT4:
-      union_ = lua_newlglmobject(L, mtype);
-      glm_mat4_copy(union1->mat4_, union_->mat4_);
-      glm_mat4_scale(union_->mat4_, scale);
-      break;
+    float scale = lua_tonumber(L, 2);
+    switch(mtype) 
+    {
+      case LUA_TVEC2:
+        union_ = lua_newlglmobject(L, mtype);
+        glm_vec2_scale(union1->vec2_, scale, union_->vec2_);
+        return 1;
+        break;
+      case LUA_TVEC3:
+        union_ = lua_newlglmobject(L, mtype);
+        glm_vec3_scale(union1->vec3_, scale, union_->vec3_);
+        return 1;
+        break;
+      case LUA_TVEC4:
+        union_ = lua_newlglmobject(L, mtype);
+        glm_vec4_scale(union1->vec4_, scale, union_->vec4_);
+        return 1;
+        break;
+      case LUA_TMAT2:
+        union_ = lua_newlglmobject(L, mtype);
+        glm_mat2_copy(union1->mat2_, union_->mat2_);
+        glm_mat2_scale(union_->mat2_, scale);
+        break;
+      case LUA_TMAT3:
+        union_ = lua_newlglmobject(L, mtype);
+        glm_mat3_copy(union1->mat3_, union_->mat3_);
+        glm_mat3_scale(union_->mat3_, scale);
+        break;
+      case LUA_TMAT4:
+        union_ = lua_newlglmobject(L, mtype);
+        glm_mat4_copy(union1->mat4_, union_->mat4_);
+        glm_mat4_scale(union_->mat4_, scale);
+        break;
+    }
+  }
+  else
+  {
+    int othertype;
+    lglm_union_t *union2 = lua_checklglmobject(L, 1, LUA_TGLMANY, &othertype);
+
+    switch(othertype)
+    {
+      case LUA_TVEC3:
+        if(mtype != LUA_TMAT4)
+          _typeerror(L, 1, LUA_MAT4);
+        union_ = lua_newlglmobject(L, mtype);
+        glm_scale_to(union1->mat4_, union2->vec3_, union_->mat4_);
+        return 1;
+        break;
+      case LUA_TVEC2:
+        if(mtype != LUA_TMAT3)
+          _typeerror(L, 1, LUA_MAT3);
+        union_ = lua_newlglmobject(L, mtype);
+        glm_mat3_copy(union1->mat3_, union_->mat3_);
+        glm_scale2d(union_->mat3_, union2->vec2_);
+        return 1;
+        break;
+      default:
+        _only_vectors_error(L, 2, LUA_TVEC3, LUA_TVEC4);
+        break;
+    }
   }
 return 0;
 }
@@ -239,31 +269,50 @@ return 1;
 
 int _rotate(lua_State* L) {
   int mtype;
-  lglm_union_t *union_, *union2, *union1 = lua_checklglmobject(L, 1, LUA_TVEC3, NULL);
-  if(lua_isnumber(L, 2))
+  float axis;
+  lglm_union_t *union_, *union2, *union1 =
+  lua_checklglmobject(L, 1, LUA_TVEC3, NULL);
+
+  switch(mtype)
   {
-    float angle = lua_tonumber(L, 2);
-    union_ = lua_newlglmobject(L, LUA_TVEC3);
-    glm_vec3_rotate(union1->vec3_, angle, union_->vec3_);
-    return 1;
+    case LUA_TMAT4:
+      axis = lua_tonumber(L, 2);
+      union2 = lua_checklglmobject(L, 3, LUA_TVEC3, NULL);
+      union_ = lua_newlglmobject(L, LUA_TMAT4);
+      glm_mat4_copy(union1->mat4_, union_->mat4_);
+      glm_rotate(union_->mat4_, axis, union2->vec3_);
+      return 1;
+      break;
+    case LUA_TVEC3:
+      if(lua_isnumber(L, 2))
+      {
+        float angle = lua_tonumber(L, 2);
+        union_ = lua_newlglmobject(L, LUA_TVEC3);
+        glm_vec3_rotate(union1->vec3_, angle, union_->vec3_);
+        return 1;
+      }
+      else
+      {
+        union2 = lua_checklglmobject(L, 2, LUA_TGLMANY, &mtype);
+        switch(mtype)
+        {
+          case LUA_TMAT3:
+            glm_vec3_rotate_m3(union2->mat3_, union1->vec3_, union_->vec3_);
+            break;
+          case LUA_TMAT4:
+            glm_vec3_rotate_m4(union2->mat4_, union1->vec3_, union_->vec3_);
+            break;
+          default:
+            _typeerror(L, 2, LUA_MAT3 " or " LUA_MAT4);
+            break;
+        }
+      }
+      break;
+    default:
+      _typeerror(L, 1, LUA_MAT4 " or " LUA_VEC3);
+      break;
   }
-  else
-  {
-    union2 = lua_checklglmobject(L, 2, LUA_TGLMANY, &mtype);
-    switch(mtype)
-    {
-      case LUA_TMAT3:
-        glm_vec3_rotate_m3(union2->mat3_, union1->vec3_, union_->vec3_);
-        break;
-      case LUA_TMAT4:
-        glm_vec3_rotate_m4(union2->mat4_, union1->vec3_, union_->vec3_);
-        break;
-      default:
-        _typeerror(L, 2, LUA_MAT3 " or " LUA_MAT4);
-        break;
-    }
-  }
-return 1;
+return 0;
 }
 
 int _proj(lua_State* L) {

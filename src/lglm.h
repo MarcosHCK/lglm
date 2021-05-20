@@ -88,10 +88,55 @@ extern "C" {
 #include <lauxlib.h>
 #include <lualib.h>
 
+/*
+ * Pushes an userdata of type 'mtype', zero initialized.
+ *
+ */
 lglm_union_t* lua_newlglmobject(lua_State* L, int mtype);
+
+/*
+ * Checks for an specific lglm object type,
+ * and throws an error if not.
+ * Obviously they are intended for C closure
+ * argument checking.
+ *
+ * lua_checklglmobject is different because 'mtype'
+ * could be LUA_TGLMANY to test for any type of lglm object and
+ * stores it's type on 'actual_mtype' (which is nullable).
+ * This allows polymorphic function which accepts multiple lglm
+ * object types as input. Of course, it throws an error if value
+ * at index 'idx' is not a lglm object of type 'mtype' (or any type 
+ * if you've passed LUA_TGLMANY);
+ *
+ */
 lglm_union_t* lua_checklglmobject(lua_State* L, int idx, int mtype, int* actual_mtype);
+lglm_union_t* lua_checklglmvec2(lua_State* L, int idx);
+lglm_union_t* lua_checklglmvec3(lua_State* L, int idx);
+lglm_union_t* lua_checklglmvec4(lua_State* L, int idx);
+lglm_union_t* lua_checklglmmat2(lua_State* L, int idx);
+lglm_union_t* lua_checklglmmat3(lua_State* L, int idx);
+lglm_union_t* lua_checklglmmat4(lua_State* L, int idx);
+
+/*
+ * Pushes a clone of lglm object at index 'idx'.
+ *
+ */
 lglm_union_t* lua_clonelglmobject(lua_State* L, int idx, int mtype);
+
+/*
+ * Getter functions.
+ * they behaves same as check function,
+ * but don't throws error if condition are
+ * not met.
+ *
+ */
 lglm_union_t* lua_tolglmobject(lua_State* L, int idx, int mtype);
+lglm_union_t* lua_tolglmvec2(lua_State* L, int idx);
+lglm_union_t* lua_tolglmvec3(lua_State* L, int idx);
+lglm_union_t* lua_tolglmvec4(lua_State* L, int idx);
+lglm_union_t* lua_tolglmmat2(lua_State* L, int idx);
+lglm_union_t* lua_tolglmmat3(lua_State* L, int idx);
+lglm_union_t* lua_tolglmmat4(lua_State* L, int idx);
 
 extern const char* lglm_typenames[];
 

@@ -67,6 +67,7 @@ extern "C" {
 
 /*
  * Internal API
+ * at lglm.c
  *
  */
 int _typeerror(lua_State *L, int arg, const char *tname);
@@ -86,6 +87,7 @@ int _mat4(lua_State* L);
 
 /*
  * Operators
+ * at operators.c
  *
  */
 int _add(lua_State* L);
@@ -99,6 +101,7 @@ int _divs(lua_State* L);
 
 /*
  * Operations
+ * at operations.c
  *
  */
 int _norm2(lua_State* L);
@@ -132,6 +135,13 @@ int _smoothinterp(lua_State* L);
 int _smoothinterpc(lua_State* L);
 
 /*
+ * Versor
+ * at versor.c
+ *
+ */
+int _qaut(lua_State* L);
+
+/*
  * Camera transforms
  * at camera.c
  *
@@ -153,6 +163,16 @@ int _persp_decomp(lua_State* L);
 int _persp_fovy(lua_State* L);
 int _persp_aspect(lua_State* L);
 int _persp_sizes(lua_State* L);
+
+/*
+ * Affine operations
+ * at affine.c
+ *
+ */
+int _translate(lua_State* L);
+int _translate_x(lua_State* L);
+int _translate_y(lua_State* L);
+int _translate_z(lua_State* L);
 
 #if __cplusplus
 }
