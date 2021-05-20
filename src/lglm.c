@@ -443,6 +443,15 @@ const struct luaL_Reg lglm_lib[] = {
   LGLM_SYMBOL(persp_sizes)
 
 /*
+ * Affine
+ *
+ */
+  LGLM_SYMBOL(translate)
+  LGLM_SYMBOL(translate_x)
+  LGLM_SYMBOL(translate_y)
+  LGLM_SYMBOL(translate_z)
+
+/*
  * NULL-terminated array
  *
  */

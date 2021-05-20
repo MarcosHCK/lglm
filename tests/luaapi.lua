@@ -115,7 +115,7 @@ local function test_vector_methods()
 end
 test_feature('Testing vector methods ...', test_vector_methods);
 
-local function test_operations()
+local function test_operators()
   local vec2 = glm.vec2(16, 15);
   local mat2 = glm.mat2(16, 15, 14, 13);
 
@@ -125,4 +125,11 @@ local function test_operations()
   print(glm.unpack(glm.div(vec2, vec2)));
   print(glm.cross(vec2, vec2)); 
 end
-test_feature('Testing operation over vectors and matrices ...', test_operations);
+test_feature('Testing operators over vectors and matrices ...', test_operators);
+
+local function test_operations()
+  local mat4 = glm.mat4(16, 15, 14, 13, 12, 11, 10,  9,  8,  7,  6,  5,  4,  3,  2,  1);
+
+  print(glm.unpack(glm.translate(mat4, glm.vec3(1, 2, 3))));
+end
+test_feature('Testing operations over vectors and matrices ...', test_operations);
