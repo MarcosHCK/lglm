@@ -12,9 +12,9 @@
 # PARTICULAR PURPOSE.
 
 m4_ifndef([AC_CONFIG_MACRO_DIRS], [m4_defun([_AM_CONFIG_MACRO_DIRS], [])m4_defun([AC_CONFIG_MACRO_DIRS], [_AM_CONFIG_MACRO_DIRS($@)])])
-m4_include([aclocal/libtool.m4])
-m4_include([aclocal/ltoptions.m4])
-m4_include([aclocal/ltsugar.m4])
-m4_include([aclocal/ltversion.m4])
-m4_include([aclocal/lt~obsolete.m4])
-m4_include([aclocal/pkg.m4])
+m4_include([build-aux/libtool.m4])
+m4_include([build-aux/ltoptions.m4])
+m4_include([build-aux/ltsugar.m4])
+m4_include([build-aux/ltversion.m4])
+m4_include([build-aux/lt~obsolete.m4])
+m4_include([build-aux/pkg.m4])

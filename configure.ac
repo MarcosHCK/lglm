@@ -20,7 +20,7 @@ AC_INIT([lglm], [lglm_VERSION], [lglm.bugs@hcktm.com], [lglm], [https://www.hckt
 AC_CONFIG_SRCDIR([src/lglm.c])
 AC_LANG([C])
 
-AC_CONFIG_MACRO_DIRS([aclocal])
+AC_CONFIG_MACRO_DIRS([build-aux])
 
 CFLAGS="-Isrc/ $CFLAGS"
 m4_define([lglm_RELEASE], m4_esyscmd([printf `sed -e 's/^#define RELEASE "\([^"]*\)"/\1/p' -e d < ./version.h`]))
