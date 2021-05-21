@@ -47,6 +47,7 @@ SHARED_FLAGS=-shared -rpath $(libdir)
 LIBTOOL=@LIBTOOL@
 INSTALL=@INSTALL@
 INSTALL_DATA=@INSTALL_DATA@
+LUA_BIN=luajit
 CC=@CC@
 LD=@LD@
 
@@ -59,6 +60,7 @@ OBJECTS=\
 	src/constructors.o \
 	src/operators.o \
 	src/operations.o \
+	src/bbox.o \
 	src/affine.o \
 	src/camera.o \
 	src/versor.o
@@ -89,14 +91,11 @@ uninstall:
 	$(LIBTOOL) --mode=uninstall rm -f $(includedir)/lglm.h
 	$(LIBTOOL) --mode=uninstall rm -f $(libdir)/pkgconfig/lglm.pc
 
-$(PACKAGE_NAME).so: $(LGLM_LIB)
-	-ln -s $(top_builddir)/.libs/lib$(PACKAGE_NAME).so $(PACKAGE_NAME).so
-
-test: $(PACKAGE_NAME).so
-	luajit $(top_builddir)/tests/luaapi.lua
+test: $(LGLM_LIB)
+	$(LUA_BIN) $(top_builddir)/tests/luaapi.lua
 
 clean:
 	rm $(OBJECTS)
 	$(LIBTOOL) --mode=clean rm -f $(LTOBJS) $(LGLM_LIB)
 
-.PHONY: all clean $(LGLM_LIB) $(PACKAGE_NAME).so test install uninstall
+.PHONY: all clean $(LGLM_LIB) test install uninstall

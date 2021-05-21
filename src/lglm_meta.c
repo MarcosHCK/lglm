@@ -20,9 +20,30 @@
 /* from operators.c */
 void _only_vectors_error(lua_State* L, int idx, int base, int top);
 
+const
+char* lglm_typenames[] = {
+    LUA_VEC2,
+    LUA_VEC3,
+    LUA_VEC4,
+    LUA_MAT2,
+    LUA_MAT3,
+    LUA_MAT4,
+    LUA_BBOX,
+    LUA_QUAT,
+};
+
+/*
+ * Check our custom type fits with their respective metatable names,
+ * and more important, do not overflow 'mtype' field (which is 4 bits wide)
+ * of 'lglm_object_t' structure.
+ *
+ */
+_STATIC_ASSERT(_N_ELEMENTS(lglm_typenames) == _LGLM_TYPES_EX);
+_STATIC_ASSERT(_N_ELEMENTS(lglm_typenames) < 15);
+
 static
 int _vector_mt__tostring(lua_State* L) {
-  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  int mtype = _checklglmobject_ex(L, 1, LUA_TGLMANY, TRUE);
   if _LIKELY(mtype != LUA_TGLMANY)
   {
     lua_pushfstring(L,
@@ -33,13 +54,6 @@ int _vector_mt__tostring(lua_State* L) {
     return 1;
   }
 return 0;
-}
-
-static
-int _vector_mt__name(lua_State* L) {
-  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
-  lua_pushstring(L, lglm_typenames[mtype]);
-return 1;
 }
 
 static
@@ -230,21 +244,33 @@ int __vector_mt__F_zero(lua_State* L) {
   {
     case LUA_TVEC2:
       glm_vec2_zero(union_->vec2_);
+      lua_pushvalue(L, 1);
+      return 1;
       break;
     case LUA_TVEC3:
       glm_vec3_zero(union_->vec3_);
+      lua_pushvalue(L, 1);
+      return 1;
       break;
     case LUA_TVEC4:
       glm_vec4_zero(union_->vec4_);
+      lua_pushvalue(L, 1);
+      return 1;
       break;
     case LUA_TMAT2:
       glm_mat2_zero(union_->mat2_);
+      lua_pushvalue(L, 1);
+      return 1;
       break;
     case LUA_TMAT3:
       glm_mat3_zero(union_->mat3_);
+      lua_pushvalue(L, 1);
+      return 1;
       break;
     case LUA_TMAT4:
       glm_mat4_zero(union_->mat4_);
+      lua_pushvalue(L, 1);
+      return 1;
       break;
   }
 return 0;
@@ -260,15 +286,61 @@ int __vector_mt__F_one(lua_State* L) {
   {
     case LUA_TVEC2:
       glm_vec2_one(union_->vec2_);
+      lua_pushvalue(L, 1);
+      return 1;
       break;
     case LUA_TVEC3:
       glm_vec3_one(union_->vec3_);
+      lua_pushvalue(L, 1);
+      return 1;
       break;
     case LUA_TVEC4:
       glm_vec4_one(union_->vec4_);
+      lua_pushvalue(L, 1);
+      return 1;
       break;
     default:
       _only_vectors_error(L, 1, 0, LUA_TVEC4);
+      break;
+  }
+return 0;
+}
+
+static
+int __vector_mt__F_invert(lua_State* L) {
+  int mtype;
+  lglm_union_t* union_ =
+  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+
+  CGLM_ALIGN(GLM_ALIGNMENT)
+  union {
+    mat2 mat2_;
+    mat3 mat3_;
+    mat4 mat4_;
+  } tmp;
+
+  switch(mtype)
+  {
+    case LUA_TMAT2:
+      glm_mat2_copy(union_->mat2_, tmp.mat2_);
+      glm_mat2_inv(tmp.mat2_, union_->mat2_);
+      lua_pushvalue(L, 1);
+      return 1;
+      break;
+    case LUA_TMAT3:
+      glm_mat3_copy(union_->mat3_, tmp.mat3_);
+      glm_mat3_inv(tmp.mat3_, union_->mat3_);
+      lua_pushvalue(L, 1);
+      return 1;
+      break;
+    case LUA_TMAT4:
+      glm_mat4_copy(union_->mat4_, tmp.mat4_);
+      glm_mat4_inv(tmp.mat4_, union_->mat4_);
+      lua_pushvalue(L, 1);
+      return 1;
+      break;
+    default:
+      _only_vectors_error(L, 1, LUA_TMAT2, LUA_TMAT4);
       break;
   }
 return 0;
@@ -427,6 +499,11 @@ int _vector_mt__index(lua_State* L) {
       {
         lua_pushcfunction(L, __vector_mt__F_one);
         return 1;
+      } else
+      if(!strcmp(index, "invert"))
+      {
+        lua_pushcfunction(L, __vector_mt__F_invert);
+        return 1;
       }
     }
   }
@@ -436,7 +513,6 @@ return 0;
 static
 const luaL_Reg vector_mt[] = {
   {"__tostring", _vector_mt__tostring},
-  {"__name", _vector_mt__name},
   {"__newindex", _vector_mt__newindex},
   {"__index", _vector_mt__index},
   {NULL, NULL},
@@ -444,10 +520,14 @@ const luaL_Reg vector_mt[] = {
 
 void _create_meta(lua_State * L) {
   int mtype;
-  for(mtype = LUA_TGLMANY + 1;mtype < _LGLM_TYPES;mtype++)
+  const char* typename;
+  for(mtype = LUA_TGLMANY + 1;mtype < _N_ELEMENTS(lglm_typenames);mtype++)
   {
-    luaL_newmetatable(L, lglm_typenames[mtype]);
+    typename = lglm_typenames[mtype];
+    luaL_newmetatable(L, typename);
     luaL_setfuncs(L, vector_mt, 0);
+    lua_pushstring(L, typename);
+    lua_setfield(L, -2, "__name");
     lua_pop(L, 1);
   }
 }

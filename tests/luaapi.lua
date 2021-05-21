@@ -22,6 +22,7 @@ local glm = require('lglm');
 local function test_feature(msg, func)
   io.stdout:write(msg .. '\r\n');
   func();
+  collectgarbage();
   io.stdout:write('\r\n');
 end
 
@@ -41,6 +42,13 @@ local function test_constuctors()
   print(glm.unpack(mat4));
 end
 test_feature('Testing constructors ...', test_constuctors);
+
+local function test_ex_constuctors()
+  local box = glm.aabb(1, 1, 1, 5, 5, 5);
+
+  print(glm.unpack(box));
+end
+test_feature('Testing extended constructors ...', test_ex_constuctors);
 
 local function test_zero_contructor()
   local vec3 = glm.vec3();
@@ -68,6 +76,31 @@ local function test_matrix_from_vectors()
   print(glm.unpack(mat2));
 end
 test_feature('Testing matrix from vectors construction ...', test_matrix_from_vectors);
+
+local function test_misplaced_args()
+  local function test(func, ...)
+    local success, reason = pcall(func, ...);
+    local function seri_(...)
+      local ret = '';
+      for _, value in ipairs({...}) do
+        ret = ret .. tostring(value) .. ', ';
+      end
+    return ret:gsub(',%s$', '');
+    end
+    io.stdout:write(string.format('test: %s(%s) ... ', tostring(func), seri_(...)));
+    if(success) then
+      io.stdout:write('failed');
+    else
+      io.stdout:write('success (' .. reason .. ')');
+    end
+    io.stdout:write('\r\n');
+  end
+
+  test(glm.invert, glm.vec3());
+  test(glm.cross, glm.vec3(), glm.vec2());
+  test(glm.cross, glm.vec3(), glm.aabb(1, 1, 1, 5, 5, 5));
+end
+test_feature('Testing misplaced args ...', test_misplaced_args);
 
 local function test_vector_index_getter()
   local vec2 = glm.vec2(16, 15);
@@ -112,6 +145,10 @@ local function test_vector_methods()
   print(glm.unpack(vec2));
   vec2:one()
   print(glm.unpack(vec2));
+
+  print(glm.unpack(glm.mat4():identity()));
+  print(glm.unpack(glm.mat4():identity():invert()));
+  print(glm.unpack(glm.invert(glm.mat4():identity())));
 end
 test_feature('Testing vector methods ...', test_vector_methods);
 

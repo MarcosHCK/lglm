@@ -26,12 +26,14 @@
  * Metatable names
  *
  */
-#define LUA_VEC2 "vec2"
-#define LUA_VEC3 "vec3"
-#define LUA_VEC4 "vec4"
-#define LUA_MAT2 "mat2"
-#define LUA_MAT3 "mat3"
-#define LUA_MAT4 "mat4"
+#define LUA_VEC2  "vec2"
+#define LUA_VEC3  "vec3"
+#define LUA_VEC4  "vec4"
+#define LUA_MAT2  "mat2"
+#define LUA_MAT3  "mat3"
+#define LUA_MAT4  "mat4"
+#define LUA_BBOX  "bbox"
+#define LUA_QUAT  "qaut"
 
 /*
  * Mathematical entities
@@ -41,13 +43,40 @@
  */
 enum {
   LUA_TGLMANY = -1,
+
+/*
+ * Basic types
+ *
+ */
   LUA_TVEC2 = 0,
   LUA_TVEC3,
   LUA_TVEC4,
   LUA_TMAT2,
   LUA_TMAT3,
   LUA_TMAT4,
+
+/*
+ * Total basic types
+ *
+ */
   _LGLM_TYPES,
+
+/*
+ * Extended types
+ * note: this types won't be checked if you
+ * pass LUA_TGLMANY to lua_checklglmobject,
+ * they are only recognized by it's specific
+ * type.
+ *
+ */
+  LUA_TBBOX = _LGLM_TYPES,
+  LUA_TQUAT,
+
+/*
+ * Total extended types
+ *
+ */
+  _LGLM_TYPES_EX,
 };
 
 #define GLM_ALIGNMENT 16
@@ -116,6 +145,7 @@ lglm_union_t* lua_checklglmvec4(lua_State* L, int idx);
 lglm_union_t* lua_checklglmmat2(lua_State* L, int idx);
 lglm_union_t* lua_checklglmmat3(lua_State* L, int idx);
 lglm_union_t* lua_checklglmmat4(lua_State* L, int idx);
+lglm_union_t* lua_checklglmbbox(lua_State* L, int idx);
 
 /*
  * Pushes a clone of lglm object at index 'idx'.
@@ -137,7 +167,15 @@ lglm_union_t* lua_tolglmvec4(lua_State* L, int idx);
 lglm_union_t* lua_tolglmmat2(lua_State* L, int idx);
 lglm_union_t* lua_tolglmmat3(lua_State* L, int idx);
 lglm_union_t* lua_tolglmmat4(lua_State* L, int idx);
+lglm_union_t* lua_tolglmbbox(lua_State* L, int idx);
 
+/*
+ * Self-explanatory variable.
+ * Mostly used internally, but
+ * can be useful under certain
+ * circumstances (like polymorphic functions).
+ *
+ */
 extern const char* lglm_typenames[];
 
 #if __cplusplus

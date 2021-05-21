@@ -17,7 +17,7 @@
  */
 #include <lglm_luaapi.h>
 
-int _qaut(lua_State* L) {
+int _quat(lua_State* L) {
   float angle = luaL_checknumber(L, 1);
   lglm_union_t *union_, *union1 =
   lua_tolglmobject(L, 2, LUA_TVEC3);

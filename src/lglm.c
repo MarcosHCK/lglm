@@ -23,25 +23,6 @@
 #define new_lib(L, l) (lua_newtable(L), luaL_register(L, NULL, l))
 #endif
 
-const
-char* lglm_typenames[] = {
-    LUA_VEC2,
-    LUA_VEC3,
-    LUA_VEC4,
-    LUA_MAT2,
-    LUA_MAT3,
-    LUA_MAT4,
-};
-
-/*
- * Check our custom type fits with their respective metatable names,
- * and more important, do not overflow 'mtype' field (which is 4 bits wide)
- * of 'lglm_object_t' structure.
- *
- */
-_STATIC_ASSERT(_N_ELEMENTS(lglm_typenames) == _LGLM_TYPES);
-_STATIC_ASSERT(_LGLM_TYPES < 15);
-
 /*
  * Taken from Lua source
  *
@@ -102,7 +83,7 @@ int _trowtypeerror(lua_State* L, int idx, int mtype) {
   }
 }
 
-int _checklglmobject(lua_State* L, int idx, int mtype, int throw_error) {
+int _checklglmobject_full(lua_State* L, int idx, int mtype, int throw_error, int any_top) {
   void* p = lua_touserdata(L, idx);
   if(p)
   {
@@ -116,37 +97,37 @@ int _checklglmobject(lua_State* L, int idx, int mtype, int throw_error) {
  */
     if(lua_getmetatable(L, idx))
     {
-      switch(mtype) {
-      case LUA_TVEC2:
-      case LUA_TVEC3:
-      case LUA_TVEC4:
-      case LUA_TMAT2:
-      case LUA_TMAT3:
-      case LUA_TMAT4:
-        luaL_getmetatable(L, lglm_typenames[mtype]);
-        if(!lua_rawequal(L, -1, -2))
-          p = NULL;
-
-        lua_pop(L, 1);
-        break;
-      case LUA_TGLMANY:
-        for(mtype = 0;mtype > _LGLM_TYPES;mtype++)
+      if(mtype == LUA_TGLMANY)
+      {
+        int matches = FALSE;
+        for(mtype = 0;mtype < any_top;mtype++)
         {
           luaL_getmetatable(L, lglm_typenames[mtype]);
           if(lua_rawequal(L, -1, -2))
           {
-            p = NULL;
+            matches = TRUE;
+            lua_pop(L, 1);
             break;
           }
+
           lua_pop(L, 1);
         }
-        break;
+
+        if(!matches)
+          p = NULL;
+      }
+      else
+      {
+        luaL_getmetatable(L, lglm_typenames[mtype]);
+        if(!lua_rawequal(L, -1, -2))
+          p = NULL;
+        lua_pop(L, 1);
       }
 
       lua_pop(L, 1);
     }
     else
-      p = NULL;
+    p = NULL;
   }
 
   if(p == NULL)
@@ -158,6 +139,14 @@ int _checklglmobject(lua_State* L, int idx, int mtype, int throw_error) {
 
   lglm_object_t* obj = (lglm_object_t*)(p);
 return obj->mtype;
+}
+
+int _checklglmobject(lua_State* L, int idx, int mtype, int throw_error) {
+  return _checklglmobject_full(L, idx, mtype, throw_error, _LGLM_TYPES);
+}
+
+int _checklglmobject_ex(lua_State* L, int idx, int mtype, int throw_error) {
+  return _checklglmobject_full(L, idx, mtype, throw_error, _LGLM_TYPES_EX);
 }
 
 lglm_union_t* lua_checklglmobject(lua_State* L, int idx, int mtype, int* actual_mtype) {
@@ -200,6 +189,10 @@ return lua_checklglmobject(L, idx, LUA_TMAT2, NULL);
 
 lglm_union_t* lua_checklglmmat4(lua_State* L, int idx) {
 return lua_checklglmobject(L, idx, LUA_TMAT2, NULL);
+}
+
+lglm_union_t* lua_checklglmbbox(lua_State* L, int idx) {
+return lua_checklglmobject(L, idx, LUA_TBBOX, NULL);
 }
 
 lglm_union_t* lua_clonelglmobject(lua_State* L, int idx, int mtype) {
@@ -271,6 +264,10 @@ lglm_union_t* lua_tolglmmat4(lua_State* L, int idx) {
 return lua_tolglmobject(L, idx, LUA_TMAT4);
 }
 
+lglm_union_t* lua_tolglmbbox(lua_State* L, int idx) {
+return lua_tolglmobject(L, idx, LUA_TBBOX);
+}
+
 /*
  * Module stuff
  *
@@ -278,7 +275,7 @@ return lua_tolglmobject(L, idx, LUA_TMAT4);
 
 static
 int _unpack(lua_State* L) {
-  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  int mtype = _checklglmobject_ex(L, 1, LUA_TGLMANY, TRUE);
   lglm_union_t* union_ = lua_tolglmobject(L, 1, mtype);
 
   if _LIKELY(mtype != LUA_TGLMANY)
@@ -295,6 +292,7 @@ int _unpack(lua_State* L) {
         lua_pushnumber(L, union_->vec3_[2]);
         return 3;
         break;
+    case LUA_TQUAT:
     case LUA_TVEC4:
         lua_pushnumber(L, union_->vec4_[0]);
         lua_pushnumber(L, union_->vec4_[1]);
@@ -339,6 +337,15 @@ int _unpack(lua_State* L) {
         lua_pushnumber(L, union_->mat4_[3][2]);
         lua_pushnumber(L, union_->mat4_[3][3]);
         return 16;
+        break;
+      case LUA_TBBOX:
+        lua_pushnumber(L, union_->mat3_[0][0]);
+        lua_pushnumber(L, union_->mat3_[0][1]);
+        lua_pushnumber(L, union_->mat3_[0][2]);
+        lua_pushnumber(L, union_->mat3_[1][0]);
+        lua_pushnumber(L, union_->mat3_[1][1]);
+        lua_pushnumber(L, union_->mat3_[1][2]);
+        return 6;
         break;
   }
 return 0;
@@ -419,6 +426,36 @@ const struct luaL_Reg lglm_lib[] = {
   LGLM_SYMBOL(smoothstep)
   LGLM_SYMBOL(smoothinterp)
   LGLM_SYMBOL(smoothinterpc)
+  LGLM_SYMBOL(invert)
+
+/*
+ * Bounding box
+ * at bbox.c
+ *
+ */
+  LGLM_SYMBOL(aabb)
+  LGLM_SYMBOL(aabb_transform)
+  LGLM_SYMBOL(aabb_merge)
+  LGLM_SYMBOL(aabb_crop)
+  LGLM_SYMBOL(aabb_crop_until)
+  LGLM_SYMBOL(aabb_frustum)
+  LGLM_SYMBOL(aabb_invalidate)
+  LGLM_SYMBOL(aabb_isvalid)
+  LGLM_SYMBOL(aabb_size)
+  LGLM_SYMBOL(aabb_radius)
+  LGLM_SYMBOL(aabb_center)
+  {"aabb_aabb", _aabb_intercepts},
+  LGLM_SYMBOL(aabb_intercepts)
+  LGLM_SYMBOL(aabb_sphere)
+  LGLM_SYMBOL(aabb_point)
+  LGLM_SYMBOL(aabb_contains)
+
+/*
+ * Quaternion
+ * at versor.c
+ *
+ */
+  LGLM_SYMBOL(quat)
 
 /*
  * Camera

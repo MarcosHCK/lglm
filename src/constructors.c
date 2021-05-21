@@ -38,7 +38,6 @@ void _ctor_typeerror(lua_State* L, int idx) {
   _typeerror(L, idx, types);
 }
 
-static
 void _get_floats(lua_State* L, int floats_needed, float* floats) {
   lglm_union_t* union_;
   float* mstore;
@@ -87,7 +86,6 @@ int _vec2(lua_State* L) {
  *
  */
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TVEC2);
-  float* mstore = (float*)(union_);
   _get_floats(L, 2, (float*)(union_));
 return 1;
 }
@@ -99,7 +97,6 @@ int _vec3(lua_State* L) {
  *
  */
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TVEC3);
-  float* mstore = (float*)(union_);
   _get_floats(L, 3, (float*)(union_));
 return 1;
 }
@@ -111,7 +108,6 @@ int _vec4(lua_State* L) {
  *
  */
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TVEC4);
-  float* mstore = (float*)(union_);
   _get_floats(L, 4, (float*)(union_));
 return 1;
 }
@@ -123,7 +119,6 @@ int _mat2(lua_State* L) {
  *
  */
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TMAT2);
-  float* mstore = (float*)(union_);
   _get_floats(L, 4, (float*)(union_));
 return 1;
 }
@@ -135,7 +130,6 @@ int _mat3(lua_State* L) {
  *
  */
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TMAT3);
-  float* mstore = (float*)(union_);
   _get_floats(L, 9, (float*)(union_));
 return 1;
 }
@@ -147,7 +141,6 @@ int _mat4(lua_State* L) {
  *
  */
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TMAT4);
-  float* mstore = (float*)(union_);
   _get_floats(L, 16, (float*)(union_));
 return 1;
 }

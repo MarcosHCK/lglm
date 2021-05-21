@@ -932,3 +932,32 @@ int _smoothinterpc(lua_State* L) {
   }
 return 0;
 }
+
+int _invert(lua_State* L) {
+  int mtype;
+  lglm_union_t *union2, *union_ =
+  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+
+  switch(mtype)
+  {
+    case LUA_TMAT2:
+      union2 = lua_newlglmobject(L, mtype);
+      glm_mat2_inv(union_->mat2_, union2->mat2_);
+      return 1;
+      break;
+    case LUA_TMAT3:
+      union2 = lua_newlglmobject(L, mtype);
+      glm_mat3_inv(union_->mat3_, union2->mat3_);
+      return 1;
+      break;
+    case LUA_TMAT4:
+      union2 = lua_newlglmobject(L, mtype);
+      glm_mat4_inv(union_->mat4_, union2->mat4_);
+      return 1;
+      break;
+    default:
+      _only_vectors_error(L, 1, LUA_TMAT2, LUA_TMAT4);
+      break;
+  }
+return 0;
+}

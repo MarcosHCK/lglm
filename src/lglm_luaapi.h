@@ -58,7 +58,14 @@ int _floats_count(int mtype) {
   case LUA_TMAT4:
     return 16;
     break;
+  case LUA_TBBOX:
+    return 6;
+    break;
+  case LUA_TQUAT:
+    return 4;
+    break;
   }
+return 0;
 }
 
 #if __cplusplus
@@ -72,6 +79,7 @@ extern "C" {
  */
 int _typeerror(lua_State *L, int arg, const char *tname);
 int _checklglmobject(lua_State* L, int idx, int mtype, int throw_error);
+int _checklglmobject_ex(lua_State* L, int idx, int mtype, int throw_error);
 
 /*
  * Constructors
@@ -133,13 +141,35 @@ int _smoothstep_uni(lua_State* L);
 int _smoothstep(lua_State* L);
 int _smoothinterp(lua_State* L);
 int _smoothinterpc(lua_State* L);
+int _invert(lua_State* L);
 
 /*
- * Versor
+ * Bounding box
+ * at bbox.c
+ *
+ */
+int _aabb(lua_State* L);
+int _aabb_transform(lua_State* L);
+int _aabb_merge(lua_State* L);
+int _aabb_crop(lua_State* L);
+int _aabb_crop_until(lua_State* L);
+int _aabb_frustum(lua_State* L);
+int _aabb_invalidate(lua_State* L);
+int _aabb_isvalid(lua_State* L);
+int _aabb_size(lua_State* L);
+int _aabb_radius(lua_State* L);
+int _aabb_center(lua_State* L);
+int _aabb_intercepts(lua_State* L);
+int _aabb_sphere(lua_State* L);
+int _aabb_point(lua_State* L);
+int _aabb_contains(lua_State* L);
+
+/*
+ * Quaternion
  * at versor.c
  *
  */
-int _qaut(lua_State* L);
+int _quat(lua_State* L);
 
 /*
  * Camera transforms
