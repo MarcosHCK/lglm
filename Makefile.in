@@ -55,14 +55,15 @@ LGLM_LIB=liblglm.la
 LGLM_INC=src/lglm.h
 
 OBJECTS=\
+	src/affine.o \
+	src/bbox.o \
+	src/camera.o \
+	src/constructors.o \
 	src/lglm.o \
 	src/lglm_meta.o \
-	src/constructors.o \
-	src/operators.o \
 	src/operations.o \
-	src/bbox.o \
-	src/affine.o \
-	src/camera.o \
+	src/operators.o \
+	src/sphere.o \
 	src/versor.o
 
 LTOBJS := $(OBJECTS:.o=.lo)

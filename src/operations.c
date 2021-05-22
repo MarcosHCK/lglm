@@ -21,8 +21,8 @@
 void _only_vectors_error(lua_State* L, int idx, int base, int top);
 
 int _norm2(lua_State* L) {
-  int mtype;
-  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t* union_ = _tolglmobject(L, 1, mtype);
   switch(mtype) 
   {
     case LUA_TVEC2:
@@ -45,8 +45,8 @@ return 0;
 }
 
 int _norm(lua_State* L) {
-  int mtype;
-  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t* union_ = _tolglmobject(L, 1, mtype);
   switch(mtype) 
   {
     case LUA_TVEC2:
@@ -69,8 +69,8 @@ return 0;
 }
 
 int _norm_one(lua_State* L) {
-  int mtype;
-  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t* union_ = _tolglmobject(L, 1, mtype);
   switch(mtype) 
   {
     case LUA_TVEC3:
@@ -89,8 +89,8 @@ return 0;
 }
 
 int _norm_inf(lua_State* L) {
-  int mtype;
-  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t* union_ = _tolglmobject(L, 1, mtype);
   switch(mtype) 
   {
     case LUA_TVEC3:
@@ -109,8 +109,8 @@ return 0;
 }
 
 int _scale(lua_State* L) {
-  int mtype;
-  lglm_union_t *union_, *union1 = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union1 = _tolglmobject(L, 1, mtype);
   if(lua_isnumber(L, 2))
   {
     float scale = lua_tonumber(L, 2);
@@ -150,8 +150,8 @@ int _scale(lua_State* L) {
   }
   else
   {
-    int othertype;
-    lglm_union_t *union2 = lua_checklglmobject(L, 2, LUA_TGLMANY, &othertype);
+    int othertype = _checklglmobject(L, 2, LUA_TGLMANY, TRUE);
+    lglm_union_t *union2 = _tolglmobject(L, 2, othertype);
 
     switch(othertype)
     {
@@ -179,8 +179,8 @@ return 0;
 }
 
 int _scale_as(lua_State* L) {
-  int mtype;
-  lglm_union_t *union_, *union1 = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union1 = _tolglmobject(L, 1, mtype);
   float scale = luaL_checknumber(L, 2);
   switch(mtype) 
   {
@@ -207,8 +207,8 @@ return 0;
 }
 
 int _negate(lua_State* L) {
-  int mtype;
-  lglm_union_t *union_, *union1 = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union1 = _tolglmobject(L, 1, mtype);
   switch(mtype) 
   {
     case LUA_TVEC2:
@@ -234,8 +234,8 @@ return 0;
 }
 
 int _normalize(lua_State* L) {
-  int mtype;
-  lglm_union_t *union_, *union1 = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union1 = _tolglmobject(L, 1, mtype);
   switch(mtype) 
   {
     case LUA_TVEC2:
@@ -261,23 +261,22 @@ return 0;
 }
 
 int _angle(lua_State* L) {
-  lglm_union_t *union1 = lua_checklglmobject(L, 1, LUA_TVEC3, NULL),
-               *union2 = lua_checklglmobject(L, 2, LUA_TVEC3, NULL);
+  lglm_union_t *union1 = lua_checklglmobject(L, 1, LUA_TVEC3),
+               *union2 = lua_checklglmobject(L, 2, LUA_TVEC3);
   lua_pushnumber(L, glm_vec3_angle(union1->vec3_, union2->vec3_));
 return 1;
 }
 
 int _rotate(lua_State* L) {
-  int mtype;
+  int mtype = _checklglmobject(L, 1, LUA_TVEC3, TRUE);
+  lglm_union_t *union_, *union2, *union1 = _tolglmobject(L, 1, mtype);
   float axis;
-  lglm_union_t *union_, *union2, *union1 =
-  lua_checklglmobject(L, 1, LUA_TVEC3, NULL);
 
   switch(mtype)
   {
     case LUA_TMAT4:
       axis = lua_tonumber(L, 2);
-      union2 = lua_checklglmobject(L, 3, LUA_TVEC3, NULL);
+      union2 = lua_checklglmobject(L, 3, LUA_TVEC3);
       union_ = lua_newlglmobject(L, LUA_TMAT4);
       glm_mat4_copy(union1->mat4_, union_->mat4_);
       glm_rotate(union_->mat4_, axis, union2->vec3_);
@@ -293,7 +292,8 @@ int _rotate(lua_State* L) {
       }
       else
       {
-        union2 = lua_checklglmobject(L, 2, LUA_TGLMANY, &mtype);
+        mtype = _checklglmobject(L, 2, LUA_TGLMANY, TRUE);
+        union2 = _tolglmobject(L, 2, mtype);
         switch(mtype)
         {
           case LUA_TMAT3:
@@ -316,38 +316,38 @@ return 0;
 }
 
 int _proj(lua_State* L) {
-  lglm_union_t *union1 = lua_checklglmobject(L, 1, LUA_TVEC3, NULL),
-               *union2 = lua_checklglmobject(L, 2, LUA_TVEC3, NULL),
+  lglm_union_t *union1 = lua_checklglmobject(L, 1, LUA_TVEC3),
+               *union2 = lua_checklglmobject(L, 2, LUA_TVEC3),
                *union_ = lua_newlglmobject(L, LUA_TVEC3);
   glm_vec3_proj(union1->vec3_, union2->vec3_, union_->vec3_);
 return 1;
 }
 
 int _center(lua_State* L) {
-  lglm_union_t *union1 = lua_checklglmobject(L, 1, LUA_TVEC3, NULL),
-               *union2 = lua_checklglmobject(L, 2, LUA_TVEC3, NULL),
+  lglm_union_t *union1 = lua_checklglmobject(L, 1, LUA_TVEC3),
+               *union2 = lua_checklglmobject(L, 2, LUA_TVEC3),
                *union_ = lua_newlglmobject(L, LUA_TVEC3);
   glm_vec3_center(union1->vec3_, union2->vec3_, union_->vec3_);
 return 1;
 }
 
 int _distance2(lua_State* L) {
-  int mtype;
-  lglm_union_t *union2, *union1 = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union2, *union1 = _tolglmobject(L, 1, mtype);
   switch(mtype) 
   {
     case LUA_TVEC2:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       lua_pushnumber(L, glm_vec2_distance2(union1->vec2_, union2->vec2_));
       return 1;
       break;
     case LUA_TVEC3:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       lua_pushnumber(L, glm_vec3_distance2(union1->vec3_, union2->vec3_));
       return 1;
       break;
     case LUA_TVEC4:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       lua_pushnumber(L, glm_vec4_distance2(union1->vec4_, union2->vec4_));
       return 1;
       break;
@@ -359,22 +359,22 @@ return 0;
 }
 
 int _distance(lua_State* L) {
-  int mtype;
-  lglm_union_t *union2, *union1 = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union2, *union1 = _tolglmobject(L, 1, mtype);
   switch(mtype) 
   {
     case LUA_TVEC2:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       lua_pushnumber(L, glm_vec2_distance(union1->vec2_, union2->vec2_));
       return 1;
       break;
     case LUA_TVEC3:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       lua_pushnumber(L, glm_vec3_distance(union1->vec3_, union2->vec3_));
       return 1;
       break;
     case LUA_TVEC4:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       lua_pushnumber(L, glm_vec4_distance(union1->vec4_, union2->vec4_));
       return 1;
       break;
@@ -386,8 +386,8 @@ return 0;
 }
 
 int _max(lua_State* L) {
-  int mtype;
-  lglm_union_t *union_ = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_ = _tolglmobject(L, 1, mtype);
   switch(mtype) 
   {
     case LUA_TVEC2:
@@ -410,8 +410,8 @@ return 0;
 }
 
 int _min(lua_State* L) {
-  int mtype;
-  lglm_union_t *union_ = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_ = _tolglmobject(L, 1, mtype);
   switch(mtype) 
   {
     case LUA_TVEC2:
@@ -434,24 +434,24 @@ return 0;
 }
 
 int _maxv(lua_State* L) {
-  int mtype;
-  lglm_union_t *union_, *union2, *union1 = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union2, *union1 = _tolglmobject(L, 1, mtype);
   switch(mtype) 
   {
     case LUA_TVEC2:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec2_maxv(union1->vec2_, union2->vec2_, union_->vec2_);
       return 1;
       break;
     case LUA_TVEC3:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec3_maxv(union1->vec3_, union2->vec3_, union_->vec3_);
       return 1;
       break;
     case LUA_TVEC4:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec4_maxv(union1->vec4_, union2->vec4_, union_->vec4_);
       return 1;
@@ -464,24 +464,24 @@ return 0;
 }
 
 int _minv(lua_State* L) {
-  int mtype;
-  lglm_union_t *union_, *union2, *union1 = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union2, *union1 = _tolglmobject(L, 1, mtype);
   switch(mtype) 
   {
     case LUA_TVEC2:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec2_minv(union1->vec2_, union2->vec2_, union_->vec2_);
       return 1;
       break;
     case LUA_TVEC3:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec3_minv(union1->vec3_, union2->vec3_, union_->vec3_);
       return 1;
       break;
     case LUA_TVEC4:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec4_minv(union1->vec4_, union2->vec4_, union_->vec4_);
       return 1;
@@ -494,7 +494,7 @@ return 0;
 }
 
 int _ortho(lua_State* L) {
-  lglm_union_t *union1 = lua_checklglmobject(L, 1, LUA_TVEC3, NULL),
+  lglm_union_t *union1 = lua_checklglmobject(L, 1, LUA_TVEC3),
                *union_ = lua_newlglmobject(L, LUA_TVEC3);
   glm_vec3_ortho(union1->vec3_, union_->vec3_);
 return 1;
@@ -502,8 +502,8 @@ return 1;
 
 static
 int _clamp_vector(lua_State* L) {
-  int mtype;
-  lglm_union_t *union_, *union1 = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union1 = _tolglmobject(L, 1, mtype);
   float min_v = luaL_checknumber(L, 2),
         max_v = luaL_checknumber(L, 3);
 
@@ -553,25 +553,25 @@ return 0;
 
 static
 int _lerp_vector(lua_State* L) {
-  int mtype;
-  lglm_union_t *union_, *union2, *union1 = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union2, *union1 = _tolglmobject(L, 1, mtype);
   float t = luaL_checknumber(L, 2);
   switch(mtype) 
   {
     case LUA_TVEC2:
-      union2 = lua_checklglmobject(L, 3, mtype, NULL);
+      union2 = lua_checklglmobject(L, 3, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec2_lerp(union1->vec2_, union2->vec2_, t, union_->vec2_);
       return 1;
       break;
     case LUA_TVEC3:
-      union2 = lua_checklglmobject(L, 3, mtype, NULL);
+      union2 = lua_checklglmobject(L, 3, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec3_lerp(union1->vec3_, union2->vec3_, t, union_->vec3_);
       return 1;
       break;
     case LUA_TVEC4:
-      union2 = lua_checklglmobject(L, 3, mtype, NULL);
+      union2 = lua_checklglmobject(L, 3, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec4_lerp(union1->vec4_, union2->vec4_, t, union_->vec4_);
       return 1;
@@ -605,19 +605,19 @@ return 0;
 
 static
 int _lerpc_vector(lua_State* L) {
-  int mtype;
-  lglm_union_t *union_, *union2, *union1 = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union2, *union1 = _tolglmobject(L, 1, mtype);
   float t = luaL_checknumber(L, 2);
   switch(mtype) 
   {
     case LUA_TVEC3:
-      union2 = lua_checklglmobject(L, 3, mtype, NULL);
+      union2 = lua_checklglmobject(L, 3, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec3_lerp(union1->vec3_, union2->vec3_, t, union_->vec3_);
       return 1;
       break;
     case LUA_TVEC4:
-      union2 = lua_checklglmobject(L, 3, mtype, NULL);
+      union2 = lua_checklglmobject(L, 3, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec4_lerp(union1->vec4_, union2->vec4_, t, union_->vec4_);
       return 1;
@@ -653,19 +653,19 @@ return 0;
 }
 
 int _mix(lua_State* L) {
-  int mtype;
-  lglm_union_t *union_, *union2, *union1 = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union2, *union1 = _tolglmobject(L, 1, mtype);
   float t = luaL_checknumber(L, 2);
   switch(mtype) 
   {
     case LUA_TVEC3:
-      union2 = lua_checklglmobject(L, 3, mtype, NULL);
+      union2 = lua_checklglmobject(L, 3, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec3_mix(union1->vec3_, union2->vec3_, t, union_->vec3_);
       return 1;
       break;
     case LUA_TVEC4:
-      union2 = lua_checklglmobject(L, 3, mtype, NULL);
+      union2 = lua_checklglmobject(L, 3, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec4_mix(union1->vec4_, union2->vec4_, t, union_->vec4_);
       return 1;
@@ -678,19 +678,19 @@ return 0;
 }
 
 int _mixc(lua_State* L) {
-  int mtype;
-  lglm_union_t *union_, *union2, *union1 = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union2, *union1 = _tolglmobject(L, 1, mtype);
   float t = luaL_checknumber(L, 2);
   switch(mtype) 
   {
     case LUA_TVEC3:
-      union2 = lua_checklglmobject(L, 3, mtype, NULL);
+      union2 = lua_checklglmobject(L, 3, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec3_mixc(union1->vec3_, union2->vec3_, t, union_->vec3_);
       return 1;
       break;
     case LUA_TVEC4:
-      union2 = lua_checklglmobject(L, 3, mtype, NULL);
+      union2 = lua_checklglmobject(L, 3, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec4_mixc(union1->vec4_, union2->vec4_, t, union_->vec4_);
       return 1;
@@ -703,9 +703,10 @@ return 0;
 }
 
 int _step_uni(lua_State* L) {
-  int mtype;
-  float step = luaL_checknumber(L, 1);
-  lglm_union_t *union_, *union1 = lua_checklglmobject(L, 2, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union1 = _tolglmobject(L, 1, mtype);
+  float step = luaL_checknumber(L, 2);
+
   switch(mtype) 
   {
     case LUA_TVEC3:
@@ -727,18 +728,18 @@ return 0;
 
 static
 int _step_vector(lua_State* L) {
-  int mtype;
-  lglm_union_t *union_, *union2, *union1 = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union2, *union1 = _tolglmobject(L, 1, mtype);
   switch(mtype) 
   {
     case LUA_TVEC3:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec3_step(union1->vec3_, union2->vec3_, union_->vec3_);
       return 1;
       break;
     case LUA_TVEC4:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec4_step(union1->vec4_, union2->vec4_, union_->vec4_);
       return 1;
@@ -770,10 +771,10 @@ return 0;
 }
 
 int _smoothstep_uni(lua_State* L) {
-  int mtype;
-  float edge1 = luaL_checknumber(L, 1);
-  float edge2 = luaL_checknumber(L, 2);
-  lglm_union_t *union_, *union1 = lua_checklglmobject(L, 3, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union1 = _tolglmobject(L, 1, mtype);
+  float edge1 = luaL_checknumber(L, 2),
+        edge2 = luaL_checknumber(L, 3);
 
   switch(mtype) 
   {
@@ -796,20 +797,20 @@ return 0;
 
 static
 int _smoothstep_vector(lua_State* L) {
-  int mtype;
-  lglm_union_t *union_, *union3, *union2, *union1 = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union3, *union2, *union1 = _tolglmobject(L, 1, mtype);
   switch(mtype) 
   {
     case LUA_TVEC3:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
-      union3 = lua_checklglmobject(L, 3, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
+      union3 = lua_checklglmobject(L, 3, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec3_smoothstep(union1->vec3_, union2->vec3_, union3->vec3_, union_->vec3_);
       return 1;
       break;
     case LUA_TVEC4:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
-      union3 = lua_checklglmobject(L, 3, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
+      union3 = lua_checklglmobject(L, 3, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec4_smoothstep(union1->vec4_, union2->vec4_, union3->vec4_, union_->vec4_);
       return 1;
@@ -843,19 +844,20 @@ return 0;
 
 static
 int _smoothinterp_vector(lua_State* L) {
-  int mtype;
-  lglm_union_t *union_, *union2, *union1 = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union2, *union1 = _tolglmobject(L, 1, mtype);
   float t = luaL_checknumber(L, 3);
+
   switch(mtype) 
   {
     case LUA_TVEC3:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec3_smoothinterp(union1->vec3_, union2->vec3_, t, union_->vec3_);
       return 1;
       break;
     case LUA_TVEC4:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec4_smoothinterp(union1->vec4_, union2->vec4_, t, union_->vec4_);
       return 1;
@@ -889,19 +891,20 @@ return 0;
 
 static
 int _smoothinterpc_vector(lua_State* L) {
-  int mtype;
-  lglm_union_t *union_, *union2, *union1 = lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union2, *union1 = _tolglmobject(L, 1, mtype);
   float t = luaL_checknumber(L, 3);
+
   switch(mtype) 
   {
     case LUA_TVEC3:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec3_smoothinterpc(union1->vec3_, union2->vec3_, t, union_->vec3_);
       return 1;
       break;
     case LUA_TVEC4:
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       union_ = lua_newlglmobject(L, mtype);
       glm_vec4_smoothinterpc(union1->vec4_, union2->vec4_, t, union_->vec4_);
       return 1;
@@ -934,9 +937,8 @@ return 0;
 }
 
 int _invert(lua_State* L) {
-  int mtype;
-  lglm_union_t *union2, *union_ =
-  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union2, *union_ = _tolglmobject(L, 1, mtype);
 
   switch(mtype)
   {

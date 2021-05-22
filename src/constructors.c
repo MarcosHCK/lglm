@@ -40,8 +40,7 @@ void _ctor_typeerror(lua_State* L, int idx) {
 
 #define _n (*__n)
 
-static
-void _get_floats_process(lua_State* L, int idx_, int* __n, const int floats_needed, float* floats) {
+void _get_floats_from(lua_State* L, int idx_, int* __n, const int floats_needed, float* floats) {
   int i, mtype, type = 
   lua_type(L, idx_);
 
@@ -53,7 +52,7 @@ void _get_floats_process(lua_State* L, int idx_, int* __n, const int floats_need
         lua_pushinteger(L, i);
         lua_gettable(L, idx_);
 
-        _get_floats_process(L, -1, __n, floats_needed, floats);
+        _get_floats_from(L, -1, __n, floats_needed, floats);
         lua_pop(L, 1);
       }
       break;
@@ -74,6 +73,9 @@ void _get_floats_process(lua_State* L, int idx_, int* __n, const int floats_need
     case LUA_TNUMBER:
       floats[_n++] = lua_tonumber(L, idx_);
       break;
+    case LUA_TNONE:
+      floats[_n++] = 0.0f;
+      break;
     default:
       _ctor_typeerror(L, idx_);
       break;
@@ -88,7 +90,7 @@ void _get_floats(lua_State* L, int floats_needed, float* floats) {
 
   do
   {
-    _get_floats_process(L, idx++, &_n, floats_needed, floats);
+    _get_floats_from(L, idx++, &_n, floats_needed, floats);
   }
   while(floats_needed > _n);
 }

@@ -138,14 +138,14 @@ local function test_vector_index_setter()
   vec2[2] = 1;
   vec4[4] = 2;
 
-  print(vec2.x, vec2.y, vec2.z, vec2.w);
-  print(vec4.x, vec4.y, vec4.z, vec4.w);
+  print(glm.unpack(vec2));
+  print(glm.unpack(vec4));
 
-  vec2.xzy = 8, 7;
-  vec4.wx = 8, 7;
+  vec2.x = 8;
+  vec4.w = 8;
 
-  print(vec2.x, vec2.y, vec2.z, vec2.w);
-  print(vec4.x, vec4.y, vec4.z, vec4.w);
+  print(glm.unpack(vec2));
+  print(glm.unpack(vec4));
 end
 test_feature('Testing vector indexing (setter) ...', test_vector_index_setter);
 

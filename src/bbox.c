@@ -29,8 +29,8 @@ return 1;
 }
 
 int _aabb_transform(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TBBOX, NULL);
-  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TMAT4, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TBBOX);
+  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TMAT4);
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TBBOX);
 
   glm_aabb_transform((bbox)(union1->mat3_),
@@ -40,8 +40,8 @@ return 1;
 }
 
 int _aabb_merge(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TBBOX, NULL);
-  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TBBOX, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TBBOX);
+  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TBBOX);
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TBBOX);
 
   glm_aabb_merge((bbox)(union1->mat3_),
@@ -51,8 +51,8 @@ return 1;
 }
 
 int _aabb_crop(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TBBOX, NULL);
-  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TBBOX, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TBBOX);
+  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TBBOX);
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TBBOX);
 
   glm_aabb_crop((bbox)(union1->mat3_),
@@ -62,9 +62,9 @@ return 1;
 }
 
 int _aabb_crop_until(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TBBOX, NULL);
-  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TBBOX, NULL);
-  lglm_union_t* union3 = lua_checklglmobject(L, 3, LUA_TBBOX, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TBBOX);
+  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TBBOX);
+  lglm_union_t* union3 = lua_checklglmobject(L, 3, LUA_TBBOX);
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TBBOX);
 
   glm_aabb_crop((bbox)(union1->mat3_),
@@ -78,7 +78,7 @@ return 1;
 }
 
 int _aabb_frustum(lua_State* L) {
-  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TBBOX, NULL);
+  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TBBOX);
   lglm_union_t* union1;
 
   CGLM_ALIGN(GLM_ALIGNMENT)
@@ -136,7 +136,7 @@ return 1;
 }
 
 int _aabb_isvalid(lua_State* L) {
-  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TBBOX, NULL);
+  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TBBOX);
   int valid =
   glm_aabb_isvalid((bbox)(union_->mat3_));
   lua_pushboolean(L, valid);
@@ -144,7 +144,7 @@ return 1;
 }
 
 int _aabb_size(lua_State* L) {
-  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TBBOX, NULL);
+  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TBBOX);
   float size =
   glm_aabb_size((bbox)(union_->mat3_));
   lua_pushnumber(L, size);
@@ -152,7 +152,7 @@ return 1;
 }
 
 int _aabb_radius(lua_State* L) {
-  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TBBOX, NULL);
+  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TBBOX);
   float size =
   glm_aabb_radius((bbox)(union_->mat3_));
   lua_pushnumber(L, size);
@@ -160,15 +160,15 @@ return 1;
 }
 
 int _aabb_center(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TBBOX, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TBBOX);
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TVEC3);
   glm_aabb_center((bbox)(union1->mat3_), union_->vec3_);
 return 1;
 }
 
 int _aabb_intercepts(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TBBOX, NULL);
-  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TBBOX, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TBBOX);
+  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TBBOX);
   int intercepts =
   glm_aabb_aabb((bbox)(union1->mat3_), (bbox)(union2->mat3_));
   lua_pushboolean(L, intercepts);
@@ -176,8 +176,8 @@ return 1;
 }
 
 int _aabb_sphere(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TBBOX, NULL);
-  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TVEC4, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TBBOX);
+  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TSPHERE);
   int intercepts =
   glm_aabb_sphere((bbox)(union1->mat3_), union2->vec4_);
   lua_pushboolean(L, intercepts);
@@ -185,8 +185,8 @@ return 1;
 }
 
 int _aabb_point(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TBBOX, NULL);
-  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TVEC3, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TBBOX);
+  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TVEC3);
   int intercepts =
   glm_aabb_point((bbox)(union1->mat3_), union2->vec3_);
   lua_pushboolean(L, intercepts);
@@ -194,8 +194,8 @@ return 1;
 }
 
 int _aabb_contains(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TBBOX, NULL);
-  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TBBOX, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TBBOX);
+  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TBBOX);
   int contains =
   glm_aabb_contains((bbox)(union1->mat3_), (bbox)(union2->mat3_));
   lua_pushboolean(L, contains);

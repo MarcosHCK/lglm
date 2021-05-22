@@ -21,20 +21,16 @@ int _frustum(lua_State* L) {
   vec4 viewport = GLM_VEC4_BLACK_INIT;
   int idx = 1;
 
-  if(lua_isnumber(L, 1) &&
-     lua_isnumber(L, 2) &&
-     lua_isnumber(L, 3) &&
-     lua_isnumber(L, 4)
-    )
+  if(lua_isnumber(L, 1))
   {
-    viewport[0] = lua_tonumber(L, idx++);
-    viewport[1] = lua_tonumber(L, idx++);
-    viewport[2] = lua_tonumber(L, idx++);
-    viewport[3] = lua_tonumber(L, idx++);
+    viewport[0] = luaL_checknumber(L, idx++);
+    viewport[1] = luaL_checknumber(L, idx++);
+    viewport[2] = luaL_checknumber(L, idx++);
+    viewport[3] = luaL_checknumber(L, idx++);
   }
   else
   {
-    lglm_union_t* union_ = lua_checklglmobject(L, idx++, LUA_TVEC4, NULL);
+    lglm_union_t* union_ = lua_checklglmobject(L, idx++, LUA_TVEC4);
     glm_vec4_copy(union_->vec4_, viewport);
   }
 
@@ -50,20 +46,16 @@ int _ortho_persp(lua_State* L) {
   vec4 viewport = GLM_VEC4_BLACK_INIT;
   int idx = 1;
 
-  if(lua_isnumber(L, 1) &&
-     lua_isnumber(L, 2) &&
-     lua_isnumber(L, 3) &&
-     lua_isnumber(L, 4)
-    )
+  if(lua_isnumber(L, 1))
   {
-    viewport[0] = lua_tonumber(L, idx++);
-    viewport[1] = lua_tonumber(L, idx++);
-    viewport[2] = lua_tonumber(L, idx++);
-    viewport[3] = lua_tonumber(L, idx++);
+    viewport[0] = luaL_checknumber(L, idx++);
+    viewport[1] = luaL_checknumber(L, idx++);
+    viewport[2] = luaL_checknumber(L, idx++);
+    viewport[3] = luaL_checknumber(L, idx++);
   }
   else
   {
-    lglm_union_t* union_ = lua_checklglmobject(L, idx++, LUA_TVEC4, NULL);
+    lglm_union_t* union_ = lua_checklglmobject(L, idx++, LUA_TVEC4);
     glm_vec4_copy(union_->vec4_, viewport);
   }
 
@@ -76,8 +68,8 @@ return 1;
 }
 
 int _ortho_aabb(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TVEC3, NULL);
-  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TVEC3, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TVEC3);
+  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TVEC3);
 
   vec3 vectors[2];
   glm_vec3_copy(union1->vec3_, vectors[0]);
@@ -89,8 +81,8 @@ return 1;
 }
 
 int _ortho_aabb_p(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TVEC3, NULL);
-  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TVEC3, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TVEC3);
+  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TVEC3);
   float padding = luaL_checknumber(L, 3);
 
   vec3 vectors[2];
@@ -103,8 +95,8 @@ return 1;
 }
 
 int _ortho_aabb_pz(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TVEC3, NULL);
-  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TVEC3, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TVEC3);
+  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TVEC3);
   float padding = luaL_checknumber(L, 3);
 
   vec3 vectors[2];
@@ -126,7 +118,7 @@ return 1;
 
 int _ortho_default_s(lua_State* L) {
   float aspect = luaL_checknumber(L, 1);
-  float size = luaL_checknumber(L, 1);
+  float size = luaL_checknumber(L, 2);
 
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TMAT4);
   glm_ortho_default_s(aspect, size, union_->mat4_);
@@ -145,10 +137,9 @@ return 1;
 }
 
 int _persp_move_far(lua_State* L) {
-  lglm_union_t* union_ = lua_newlglmobject(L, LUA_TMAT4);
+  lglm_union_t* union_ = lua_clonelglmobject(L, 1, LUA_TMAT4);
   float delta = luaL_checknumber(L, 2);
   glm_persp_move_far(union_->mat4_, delta);
-  lua_pushvalue(L, 1);
 return 1;
 }
 
@@ -160,7 +151,7 @@ return 1;
 }
 
 int _perspective_resize(lua_State* L) {
-  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TMAT4, NULL);
+  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TMAT4);
   float aspect = luaL_checknumber(L, 2);
   glm_perspective_resize(aspect, union_->mat4_);
   lua_pushvalue(L, 1);
@@ -168,33 +159,33 @@ return 1;
 }
 
 int _lookat(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TVEC3, NULL);
-  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TVEC3, NULL);
-  lglm_union_t* union3 = lua_checklglmobject(L, 3, LUA_TVEC3, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TVEC3);
+  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TVEC3);
+  lglm_union_t* union3 = lua_checklglmobject(L, 3, LUA_TVEC3);
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TMAT4);
   glm_lookat(union1->vec3_, union2->vec3_, union3->vec3_, union_->mat4_);
 return 1;
 }
 
 int _look(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TVEC3, NULL);
-  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TVEC3, NULL);
-  lglm_union_t* union3 = lua_checklglmobject(L, 3, LUA_TVEC3, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TVEC3);
+  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TVEC3);
+  lglm_union_t* union3 = lua_checklglmobject(L, 3, LUA_TVEC3);
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TMAT4);
   glm_look(union1->vec3_, union2->vec3_, union3->vec3_, union_->mat4_);
 return 1;
 }
 
 int _look_anyup(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TVEC3, NULL);
-  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TVEC3, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TVEC3);
+  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TVEC3);
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TMAT4);
   glm_look_anyup(union1->vec3_, union2->vec3_, union_->mat4_);
 return 1;
 }
 
 int _persp_decomp(lua_State* L) {
-  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TMAT4, NULL);
+  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TMAT4);
   union {
     float array_[6];
     struct {
@@ -214,19 +205,19 @@ return 6;
 }
 
 int _persp_fovy(lua_State* L) {
-  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TMAT4, NULL);
+  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TMAT4);
   lua_pushnumber(L, glm_persp_fovy(union_->mat4_));
 return 1;
 }
 
 int _persp_aspect(lua_State* L) {
-  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TMAT4, NULL);
+  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TMAT4);
   lua_pushnumber(L, glm_persp_aspect(union_->mat4_));
 return 1;
 }
 
 int _persp_sizes(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TMAT4, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TMAT4);
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TVEC4);
   glm_persp_sizes(union1->mat4_, glm_persp_fovy(union1->mat4_), union_->vec4_);
 return 1;

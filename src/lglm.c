@@ -141,21 +141,7 @@ int _checklglmobject_full(lua_State* L, int idx, int mtype, int throw_error, int
 return obj->mtype;
 }
 
-int _checklglmobject(lua_State* L, int idx, int mtype, int throw_error) {
-  return _checklglmobject_full(L, idx, mtype, throw_error, _LGLM_TYPES);
-}
-
-int _checklglmobject_ex(lua_State* L, int idx, int mtype, int throw_error) {
-  return _checklglmobject_full(L, idx, mtype, throw_error, _LGLM_TYPES_EX);
-}
-
-lglm_union_t* lua_checklglmobject(lua_State* L, int idx, int mtype, int* actual_mtype) {
-  int dummy =
-  _checklglmobject(L, idx, mtype, TRUE);
-
-  if(actual_mtype)
-  *actual_mtype = dummy;
-
+lglm_union_t* _tolglmobject(lua_State* L, int idx, int mtype) {
   lglm_object_t* obj = (lglm_object_t*)lua_touserdata(L, idx);
   void* obj_ = (void*)obj;
 
@@ -167,32 +153,57 @@ lglm_union_t* lua_checklglmobject(lua_State* L, int idx, int mtype, int* actual_
 return (lglm_union_t*)(obj_ + obj->offset);
 }
 
+int _checklglmobject(lua_State* L, int idx, int mtype, int throw_error) {
+  return _checklglmobject_full(L, idx, mtype, throw_error, _LGLM_TYPES);
+}
+
+int _checklglmobject_ex(lua_State* L, int idx, int mtype, int throw_error) {
+  return _checklglmobject_full(L, idx, mtype, throw_error, _LGLM_TYPES_EX);
+}
+
+int lua_lglmtype(lua_State* L, int idx) {
+return _checklglmobject_full(L, idx, LUA_TGLMANY, FALSE, _LGLM_TYPES_EX);
+}
+
+lglm_union_t* lua_checklglmobject(lua_State* L, int idx, int mtype) {
+  int got =
+  _checklglmobject(L, idx, mtype, TRUE);
+  if(got == LUA_TGLMANY)
+    return NULL;
+
+return _tolglmobject(L, idx, mtype);
+}
+
 lglm_union_t* lua_checklglmvec2(lua_State* L, int idx) {
-return lua_checklglmobject(L, idx, LUA_TVEC2, NULL);
+return lua_checklglmobject(L, idx, LUA_TVEC2);
 }
 
 lglm_union_t* lua_checklglmvec3(lua_State* L, int idx) {
-return lua_checklglmobject(L, idx, LUA_TVEC3, NULL);
+return lua_checklglmobject(L, idx, LUA_TVEC3);
 }
 
 lglm_union_t* lua_checklglmvec4(lua_State* L, int idx) {
-return lua_checklglmobject(L, idx, LUA_TVEC4, NULL);
+return lua_checklglmobject(L, idx, LUA_TVEC4);
 }
 
 lglm_union_t* lua_checklglmmat2(lua_State* L, int idx) {
-return lua_checklglmobject(L, idx, LUA_TMAT2, NULL);
+return lua_checklglmobject(L, idx, LUA_TMAT2);
 }
 
 lglm_union_t* lua_checklglmmat3(lua_State* L, int idx) {
-return lua_checklglmobject(L, idx, LUA_TMAT2, NULL);
+return lua_checklglmobject(L, idx, LUA_TMAT2);
 }
 
 lglm_union_t* lua_checklglmmat4(lua_State* L, int idx) {
-return lua_checklglmobject(L, idx, LUA_TMAT2, NULL);
+return lua_checklglmobject(L, idx, LUA_TMAT2);
 }
 
 lglm_union_t* lua_checklglmbbox(lua_State* L, int idx) {
-return lua_checklglmobject(L, idx, LUA_TBBOX, NULL);
+return lua_checklglmobject(L, idx, LUA_TBBOX);
+}
+
+lglm_union_t* lua_checklglmsphere(lua_State* L, int idx) {
+return lua_checklglmobject(L, idx, LUA_TSPHERE);
 }
 
 lglm_union_t* lua_clonelglmobject(lua_State* L, int idx, int mtype) {
@@ -226,16 +237,7 @@ return to;
 lglm_union_t* lua_tolglmobject(lua_State* L, int idx, int mtype) {
   if(_checklglmobject(L, idx, mtype, FALSE) != LUA_TGLMANY)
   {
-    lglm_object_t* obj = (lglm_object_t*)lua_touserdata(L, idx);
-    void* obj_ = (void*)obj;
-
-    if _UNLIKELY(mtype != LUA_TGLMANY && mtype != obj->mtype)
-    {
-      luaL_error(L, "lglm type corruption!");
-      return NULL;
-    }
-
-    return (lglm_union_t*)(obj_ + obj->offset);
+    return _tolglmobject(L, idx, mtype);
   }
 return NULL;
 }
@@ -266,6 +268,10 @@ return lua_tolglmobject(L, idx, LUA_TMAT4);
 
 lglm_union_t* lua_tolglmbbox(lua_State* L, int idx) {
 return lua_tolglmobject(L, idx, LUA_TBBOX);
+}
+
+lglm_union_t* lua_tolglmsphere(lua_State* L, int idx) {
+return lua_tolglmobject(L, idx, LUA_TSPHERE);
 }
 
 /*
@@ -456,6 +462,12 @@ const struct luaL_Reg lglm_lib[] = {
  *
  */
   LGLM_SYMBOL(quat)
+
+/*
+ * Sphere
+ *
+ */
+  LGLM_SYMBOL(sphere)
 
 /*
  * Camera

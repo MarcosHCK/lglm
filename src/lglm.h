@@ -22,27 +22,47 @@
 /* GLM C-binding main header */
 #include <cglm/cglm.h>
 
+#if __cplusplus
+extern "C" {
+#endif // __cplusplus
+
+/*
+ * Lua main headers
+ *
+ */
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
+
+#if __cplusplus
+}
+#endif // __cplusplus
+
+
 /*
  * Metatable names
  *
  */
-#define LUA_VEC2  "vec2"
-#define LUA_VEC3  "vec3"
-#define LUA_VEC4  "vec4"
-#define LUA_MAT2  "mat2"
-#define LUA_MAT3  "mat3"
-#define LUA_MAT4  "mat4"
-#define LUA_BBOX  "bbox"
-#define LUA_QUAT  "qaut"
+#define LUA_VEC2    "vec2"
+#define LUA_VEC3    "vec3"
+#define LUA_VEC4    "vec4"
+#define LUA_MAT2    "mat2"
+#define LUA_MAT3    "mat3"
+#define LUA_MAT4    "mat4"
+#define LUA_BBOX    "bbox"
+#define LUA_QUAT    "qaut"
+#define LUA_SPHERE  "sphere"
 
 /*
- * Mathematical entities
- * to type identifiers
- * (usually stored under 'mtype' name)
+ * lglm extended types
+ * identifiers
+ * (note this *ARE NOT* Lua types,
+ * so you *CAN NOT* test them against lua_type
+ * return).
  *
  */
 enum {
-  LUA_TGLMANY = -1,
+  LUA_TGLMANY = LUA_TNONE,
 
 /*
  * Basic types
@@ -71,6 +91,7 @@ enum {
  */
   LUA_TBBOX = _LGLM_TYPES,
   LUA_TQUAT,
+  LUA_TSPHERE,
 
 /*
  * Total extended types
@@ -110,12 +131,12 @@ extern "C" {
 #endif // __cplusplus
 
 /*
- * Lua main headers
+ * Gets object type at index 'idx'.
+ * If object at index is not a lglm object
+ * returns LUA_TNONE.
  *
  */
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
+int lua_lglmtype(lua_State* L, int idx);
 
 /*
  * Pushes an userdata of type 'mtype', zero initialized.
@@ -138,7 +159,7 @@ lglm_union_t* lua_newlglmobject(lua_State* L, int mtype);
  * if you've passed LUA_TGLMANY);
  *
  */
-lglm_union_t* lua_checklglmobject(lua_State* L, int idx, int mtype, int* actual_mtype);
+lglm_union_t* lua_checklglmobject(lua_State* L, int idx, int mtype);
 lglm_union_t* lua_checklglmvec2(lua_State* L, int idx);
 lglm_union_t* lua_checklglmvec3(lua_State* L, int idx);
 lglm_union_t* lua_checklglmvec4(lua_State* L, int idx);
@@ -146,6 +167,7 @@ lglm_union_t* lua_checklglmmat2(lua_State* L, int idx);
 lglm_union_t* lua_checklglmmat3(lua_State* L, int idx);
 lglm_union_t* lua_checklglmmat4(lua_State* L, int idx);
 lglm_union_t* lua_checklglmbbox(lua_State* L, int idx);
+lglm_union_t* lua_checklglmsphere(lua_State* L, int idx);
 
 /*
  * Pushes a clone of lglm object at index 'idx'.
@@ -168,6 +190,7 @@ lglm_union_t* lua_tolglmmat2(lua_State* L, int idx);
 lglm_union_t* lua_tolglmmat3(lua_State* L, int idx);
 lglm_union_t* lua_tolglmmat4(lua_State* L, int idx);
 lglm_union_t* lua_tolglmbbox(lua_State* L, int idx);
+lglm_union_t* lua_tolglmsphere(lua_State* L, int idx);
 
 /*
  * Self-explanatory variable.

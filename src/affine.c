@@ -18,15 +18,15 @@
 #include <lglm_luaapi.h>
 
 int _translate(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TMAT4, NULL);
-  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TVEC3, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TMAT4);
+  lglm_union_t* union2 = lua_checklglmobject(L, 2, LUA_TVEC3);
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TMAT4);
   glm_translate_to(union1->mat4_, union2->vec3_, union_->mat4_);
 return 1;
 }
 
 int _translate_x(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TMAT4, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TMAT4);
   float number = luaL_checknumber(L, 2);
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TMAT4);
   glm_mat4_copy(union1->mat4_, union_->mat4_);
@@ -35,7 +35,7 @@ return 1;
 }
 
 int _translate_y(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TMAT4, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TMAT4);
   float number = luaL_checknumber(L, 2);
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TMAT4);
   glm_mat4_copy(union1->mat4_, union_->mat4_);
@@ -44,7 +44,7 @@ return 1;
 }
 
 int _translate_z(lua_State* L) {
-  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TMAT4, NULL);
+  lglm_union_t* union1 = lua_checklglmobject(L, 1, LUA_TMAT4);
   float number = luaL_checknumber(L, 2);
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TMAT4);
   glm_mat4_copy(union1->mat4_, union_->mat4_);

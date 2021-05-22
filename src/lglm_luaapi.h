@@ -80,6 +80,7 @@ extern "C" {
 int _typeerror(lua_State *L, int arg, const char *tname);
 int _checklglmobject(lua_State* L, int idx, int mtype, int throw_error);
 int _checklglmobject_ex(lua_State* L, int idx, int mtype, int throw_error);
+lglm_union_t* _tolglmobject(lua_State* L, int idx, int mtype);
 
 /*
  * Constructors
@@ -170,6 +171,13 @@ int _aabb_contains(lua_State* L);
  *
  */
 int _quat(lua_State* L);
+
+/*
+ * Sphere
+ * at sphere.c
+ *
+ */
+int _sphere(lua_State* L);
 
 /*
  * Camera transforms

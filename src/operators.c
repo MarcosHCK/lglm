@@ -52,9 +52,8 @@ void _only_same_dimensions(lua_State* L, int idx, int mtype) {
 }
 
 int _add(lua_State* L) {
-  int mtype, othertype;
-  lglm_union_t *union_, *union2, *union1 =
-  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union2, *union1 = _tolglmobject(L, 1, mtype);
 
   switch(mtype)
   {
@@ -66,7 +65,7 @@ int _add(lua_State* L) {
  * only by another vector of similar dimensions
  *
  */
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       union_ = lua_newlglmobject(L, mtype);
       switch(mtype)
       {
@@ -94,9 +93,8 @@ return 0;
 }
 
 int _adds(lua_State* L) {
-  int mtype, othertype;
-  lglm_union_t *union_, *union1 =
-  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int othertype, mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union1 = _tolglmobject(L, 1, mtype);
   float scalar = luaL_checknumber(L, 2);
 
   switch(mtype)
@@ -119,9 +117,8 @@ return 0;
 }
 
 int _sub(lua_State* L) {
-  int mtype, othertype;
-  lglm_union_t *union_, *union2, *union1 =
-  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int othertype, mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union2, *union1 = _tolglmobject(L, 1, mtype);
 
   switch(mtype)
   {
@@ -133,7 +130,7 @@ int _sub(lua_State* L) {
  * only by another vector of similar dimensions
  *
  */
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       union_ = lua_newlglmobject(L, mtype);
       switch(mtype)
       {
@@ -161,9 +158,8 @@ return 0;
 }
 
 int _subs(lua_State* L) {
-  int mtype, othertype;
-  lglm_union_t *union_, *union1 =
-  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int othertype, mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union1 = _tolglmobject(L, 1, mtype);
   float scalar = luaL_checknumber(L, 2);
 
   switch(mtype)
@@ -186,9 +182,8 @@ return 0;
 }
 
 int _dot(lua_State* L) {
-  int mtype, othertype;
-  lglm_union_t *union_, *union2, *union1 =
-  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int othertype, mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union2, *union1 = _tolglmobject(L, 1, mtype);
 
   switch(mtype)
   {
@@ -200,7 +195,7 @@ int _dot(lua_State* L) {
  * only by another vector of similar dimensions
  *
  */
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       switch(mtype)
       {
         case LUA_TVEC2:
@@ -224,7 +219,8 @@ int _dot(lua_State* L) {
     case LUA_TMAT2:
     case LUA_TMAT3:
     case LUA_TMAT4:
-      union2 = lua_checklglmobject(L, 2, LUA_TGLMANY, &othertype);
+      othertype = _checklglmobject(L, 2, LUA_TGLMANY, TRUE);
+      union2 = _tolglmobject(L, 2, othertype);
 /*
  * Matrices can be multiplied by another similar matrix or
  * by a column vector
@@ -292,9 +288,8 @@ return 0;
 }
 
 int _cross(lua_State* L) {
-  int mtype, othertype;
-  lglm_union_t *union_, *union2, *union1 =
-  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int othertype, mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union2, *union1 = _tolglmobject(L, 1, mtype);
 
   switch(mtype)
   {
@@ -306,7 +301,7 @@ int _cross(lua_State* L) {
  * only by another vector of similar dimensions
  *
  */
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       switch(mtype)
       {
         case LUA_TVEC2:
@@ -331,9 +326,8 @@ return 0;
 }
 
 int _div(lua_State* L) {
-  int mtype, othertype;
-  lglm_union_t *union_, *union2, *union1 =
-  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int othertype, mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union2, *union1 = _tolglmobject(L, 1, mtype);
 
   switch(mtype)
   {
@@ -345,7 +339,7 @@ int _div(lua_State* L) {
  * only by another vector of similar dimensions
  *
  */
-      union2 = lua_checklglmobject(L, 2, mtype, NULL);
+      union2 = lua_checklglmobject(L, 2, mtype);
       union_ = lua_newlglmobject(L, mtype);
       switch(mtype)
       {
@@ -369,9 +363,8 @@ return 0;
 }
 
 int _divs(lua_State* L) {
-  int mtype, othertype;
-  lglm_union_t *union_, *union1 =
-  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int othertype, mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union_, *union1 = _tolglmobject(L, 1, mtype);
   float scalar = luaL_checknumber(L, 2);
 
   switch(mtype)

@@ -17,6 +17,9 @@
  */
 #include <lglm_luaapi.h>
 
+/* from constructors.c */
+void _get_floats_from(lua_State* L, int idx_, int* __n, const int floats_needed, float* floats);
+
 /* from operators.c */
 void _only_vectors_error(lua_State* L, int idx, int base, int top);
 
@@ -30,6 +33,7 @@ char* lglm_typenames[] = {
     LUA_MAT4,
     LUA_BBOX,
     LUA_QUAT,
+    LUA_SPHERE,
 };
 
 /*
@@ -43,8 +47,8 @@ _STATIC_ASSERT(_N_ELEMENTS(lglm_typenames) < 15);
 
 static
 int _vector_mt__tostring(lua_State* L) {
-  int mtype = _checklglmobject_ex(L, 1, LUA_TGLMANY, TRUE);
-  if _LIKELY(mtype != LUA_TGLMANY)
+  int mtype = lua_lglmtype(L, 1);
+  if _LIKELY(mtype != LUA_TNONE)
   {
     lua_pushfstring(L,
                     "%s (%p)",
@@ -76,134 +80,53 @@ return -1;
 
 static
 int _vector_mt__newindex(lua_State* L) {
-  int mtype;
-  lglm_union_t *union2, *union_ =
-  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t *union2, *union_ = _tolglmobject(L, 1, mtype);
 
-  int othertype = _checklglmobject(L, 3, LUA_TGLMANY, FALSE);
-  if(!(lua_isnumber(L, 3) || othertype != LUA_TGLMANY))
-  {
-/*
- * Invalid value for index, wherever it is
- *
- */
-    return 0;
-  }
-  if(othertype != LUA_TGLMANY && mtype - othertype != 0)
-  {
-/*
- * Can not assign a a matrix to a vector component,
- * but a vector of similar dimensions can be assigned
- * to a matrix column.
- *
- */
-    return 0;
-  }
-
+  int index = 0;
   if(lua_isnumber(L, 2))
   {
-    int index = lua_tonumber(L, 2);
-/*
- * Simple array-like access (ex: vec4[3] or mat2[1])
- * note: index starts from 1 (as usual in Lua)
- *
- */
-    switch(mtype)
-    {
-      case LUA_TVEC2:
-        if(index >= 1 && index <= 2)
-        union_->vec2_[index - 1] = lua_tonumber(L, 3);
-        break;
-      case LUA_TVEC3:
-        if(index >= 1 && index <= 3)
-        union_->vec3_[index - 1] = lua_tonumber(L, 3);
-        break;
-      case LUA_TVEC4:
-        if(index >= 1 && index <= 4)
-        union_->vec4_[index - 1] = lua_tonumber(L, 3);
-        break;
-      case LUA_TMAT2:
-        if(index >= 1 && index <= 2)
-        {
-          union2 = lua_tolglmobject(L, 3, othertype);
-          glm_vec2_copy(union2->vec2_, union_->mat2_[index - 1]);
-        }
-        break;
-      case LUA_TMAT3:
-        if(index >= 1 && index <= 3)
-        {
-          union2 = lua_tolglmobject(L, 3, othertype);
-          glm_vec3_copy(union2->vec3_, union_->mat3_[index - 1]);
-        }
-        break;
-      case LUA_TMAT4:
-        if(index >= 1 && index <= 4)
-        {
-          union2 = lua_tolglmobject(L, 3, othertype);
-          glm_vec4_copy(union2->vec4_, union_->mat4_[index - 1]);
-        }
-        break;
-    }
+    index = lua_tointeger(L, 2);
   } else
   if(lua_isstring(L, 2))
   {
-/*
- * Point-like access
- * (ex: mat4:identity() or vec3.xz)
- *
- */
-    size_t i, sz;
-    const char* index =
-    lua_tolstring(L, 2, &sz);
-    int c, idx = 3;
+    const char* index_ = lua_tostring(L, 2);
+    index = _is_vecindex(index_[0]) + 1;
+  } else
+  return 0;
 
-    /* check if index is not a point-like access,         */
-    /* is faster then check for individual methods first  */
-    for(i = 0;i < sz;i++)
-    if(_is_vecindex(index[i]) == (-1))
-    return 0;
-
-    for(i = 0;i < sz;i++)
-    {
-      if(lua_type(L, idx) == LUA_TNONE)
-      {
-        break;
-      }
-
-      if(lua_isnil(L, idx))
-      {
-        ++idx;
-        continue;
-      }
-
-      float number = luaL_checknumber(L, idx++);
-      c = _is_vecindex(index[i]);
-
-      switch(mtype)
-      {
-        case LUA_TVEC2:
-          if(c >= 0 && c <= 1)
-          union_->vec2_[c] = number;
-          break;
-        case LUA_TVEC3:
-          if(c >= 0 && c <= 2)
-          union_->vec3_[c] = number;
-          break;
-        case LUA_TVEC4:
-          if(c >= 0 && c <= 3)
-          union_->vec4_[c] = number;
-          break;
-      }
-    }
+  if(index >= 1 && index <= _floats_count(mtype))
+  switch(mtype)
+  {
+    case LUA_TVEC2:
+      union_->vec2_[index - 1] = luaL_checknumber(L, 3);
+      break;
+    case LUA_TVEC3:
+      union_->vec3_[index - 1] = luaL_checknumber(L, 3);
+      break;
+    case LUA_TVEC4:
+      union_->vec4_[index - 1] = luaL_checknumber(L, 3);
+      break;
+    case LUA_TMAT2:
+      union2 = lua_checklglmobject(L, 3, mtype - LUA_TMAT2);
+      glm_vec2_copy(union2->vec2_, union_->mat2_[index - 1]);
+      break;
+    case LUA_TMAT3:
+      union2 = lua_checklglmobject(L, 3, mtype - LUA_TMAT2);
+      glm_vec3_copy(union2->vec3_, union_->mat3_[index - 1]);
+      break;
+    case LUA_TMAT4:
+      union2 = lua_checklglmobject(L, 3, mtype - LUA_TMAT2);
+      glm_vec4_copy(union2->vec4_, union_->mat4_[index - 1]);
+      break;
   }
 return 0;
 }
 
 static
 int __vector_mt__F_identity(lua_State* L) {
-  int mtype;
-  lglm_union_t* union_ =
-  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t* union_ = _tolglmobject(L, 1, mtype);
 
   switch(mtype)
   {
@@ -236,9 +159,8 @@ return 0;
 
 static
 int __vector_mt__F_zero(lua_State* L) {
-  int mtype;
-  lglm_union_t* union_ =
-  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t* union_ = _tolglmobject(L, 1, mtype);
 
   switch(mtype)
   {
@@ -278,9 +200,8 @@ return 0;
 
 static
 int __vector_mt__F_one(lua_State* L) {
-  int mtype;
-  lglm_union_t* union_ =
-  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t* union_ = _tolglmobject(L, 1, mtype);
 
   switch(mtype)
   {
@@ -308,9 +229,8 @@ return 0;
 
 static
 int __vector_mt__F_invert(lua_State* L) {
-  int mtype;
-  lglm_union_t* union_ =
-  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t* union_ = _tolglmobject(L, 1, mtype);
 
   CGLM_ALIGN(GLM_ALIGNMENT)
   union {
@@ -348,9 +268,8 @@ return 0;
 
 static
 int _vector_mt__index(lua_State* L) {
-  int mtype;
-  lglm_union_t* union_ =
-  lua_checklglmobject(L, 1, LUA_TGLMANY, &mtype);
+  int mtype = _checklglmobject(L, 1, LUA_TGLMANY, TRUE);
+  lglm_union_t* union_ = _tolglmobject(L, 1, mtype);
 
   if(lua_isnumber(L, 2))
   {
