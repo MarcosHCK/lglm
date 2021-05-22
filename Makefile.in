@@ -71,26 +71,26 @@ LTOBJS := $(OBJECTS:.o=.lo)
 all: $(LGLM_LIB)
 
 $(LGLM_LIB): $(LTOBJS)
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $(LGLM_LIB) $(LTOBJS) $(LUA_LIBS) $(CGLM_LIBS) $(SHARED_FLAGS)
+	@$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) -o $(LGLM_LIB) $(LTOBJS) $(LUA_LIBS) $(CGLM_LIBS) $(SHARED_FLAGS)
 
 %.lo: %.c
-	$(LIBTOOL) --mode=compile $(CC) -c $< $(LUA_CFLAGS) $(CGLM_CFLAGS) $(CFLAGS) -o $@
+	@$(LIBTOOL) --mode=compile $(CC) -c $< $(LUA_CFLAGS) $(CGLM_CFLAGS) $(CFLAGS) -o $@
 
 %.o: %.c
 	$(CC) -c $< $(LUA_CFLAGS) $(CGLM_CFLAGS) $(CFLAGS) -o $@
 
 install: $(LGLM_LIB)
-	$(INSTALL) -d $(libdir)
-	$(LIBTOOL) --mode=install $(INSTALL) $(LGLM_LIB) $(libdir)
 	$(INSTALL) -d $(includedir)
-	$(LIBTOOL) --mode=install $(INSTALL_DATA) src/lglm.h $(includedir)/lglm.h
+	@$(LIBTOOL) --mode=install $(INSTALL_DATA) src/lglm.h $(includedir)/lglm.h
 	$(INSTALL) -d $(libdir)/pkgconfig
-	$(LIBTOOL) --mode=install $(INSTALL_DATA) lglm.pc $(libdir)/pkgconfig/lglm.pc
+	@$(LIBTOOL) --mode=install $(INSTALL_DATA) lglm.pc $(libdir)/pkgconfig/lglm.pc
+	$(INSTALL) -d $(libdir)
+	@$(LIBTOOL) --mode=install $(INSTALL) $(LGLM_LIB) $(libdir)
 
 uninstall:
-	$(LIBTOOL) --mode=uninstall rm -f $(libdir)/$(LGLM_LIB)
-	$(LIBTOOL) --mode=uninstall rm -f $(includedir)/lglm.h
-	$(LIBTOOL) --mode=uninstall rm -f $(libdir)/pkgconfig/lglm.pc
+	@-$(LIBTOOL) --mode=uninstall rm -f $(includedir)/lglm.h
+	@-$(LIBTOOL) --mode=uninstall rm -f $(libdir)/pkgconfig/lglm.pc
+	@-$(LIBTOOL) --mode=uninstall rm -f $(libdir)/$(LGLM_LIB)
 
 test: $(LGLM_LIB)
 	$(LUA_BIN) $(top_builddir)/tests/luaapi.lua
@@ -99,4 +99,4 @@ clean:
 	rm $(OBJECTS)
 	$(LIBTOOL) --mode=clean rm -f $(LTOBJS) $(LGLM_LIB)
 
-.PHONY: all clean $(LGLM_LIB) test install uninstall
+.PHONY: all $(LGLM_LIB) install uninstall test clean
