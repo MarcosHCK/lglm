@@ -38,43 +38,57 @@ void _ctor_typeerror(lua_State* L, int idx) {
   _typeerror(L, idx, types);
 }
 
-void _get_floats(lua_State* L, int floats_needed, float* floats) {
-  lglm_union_t* union_;
-  float* mstore;
-  int mtype;
+#define _n (*__n)
 
-/*
- * Iterators
- *
- */
-  int i, idx = 1;
-  int _n = 0;
+static
+void _get_floats_process(lua_State* L, int idx_, int* __n, const int floats_needed, float* floats) {
+  int i, mtype, type = 
+  lua_type(L, idx_);
 
-  do
+  switch(type)
   {
-    int type = lua_type(L, idx);
-    switch(type) {
-      case LUA_TNUMBER:
-        floats[_n++] = lua_tonumber(L, idx++);
-        break;
-      case LUA_TUSERDATA:
-        lua_checklglmobject(L, idx, LUA_TGLMANY, &mtype);
-        union_ = lua_tolglmobject(L, idx++, mtype);
-        mstore = (float*)(union_);
+    case LUA_TTABLE:
+      for(i = 1;(floats_needed > _n);i++)
+      {
+        lua_pushinteger(L, i);
+        lua_gettable(L, idx_);
 
+        _get_floats_process(L, -1, __n, floats_needed, floats);
+        lua_pop(L, 1);
+      }
+      break;
+    case LUA_TUSERDATA:
+      mtype = _checklglmobject(L, idx_, LUA_TGLMANY, FALSE);
+      if(mtype == LUA_TGLMANY)
+        _ctor_typeerror(L, idx_);
+      else
+      {
+        lglm_union_t* union_ = lua_tolglmobject(L, idx_, mtype);
+        float* mstore = (float*)(union_);
         for(i = 0;i < _floats_count(mtype) && (floats_needed > _n);i++)
         {
           floats[_n++] = mstore[i];
         }
-        break;
-      case LUA_TNONE:
-        floats[_n++] = 0.0f;
-        break;
-      default:
-        _ctor_typeerror(L, idx);
-        break;
-    }
+      }
+      break;
+    case LUA_TNUMBER:
+      floats[_n++] = lua_tonumber(L, idx_);
+      break;
+    default:
+      _ctor_typeerror(L, idx_);
+      break;
+  }
+}
 
+#undef _n
+
+void _get_floats(lua_State* L, int floats_needed, float* floats) {
+  int idx = 1;
+  int _n = 0;
+
+  do
+  {
+    _get_floats_process(L, idx++, &_n, floats_needed, floats);
   }
   while(floats_needed > _n);
 }

@@ -34,3 +34,21 @@ autom4te.cache/*
 /libtool
 /config.h
 /lglm.pc
+
+#
+# Object files
+#
+*.o
+*.lo
+
+#
+# libtool libraries
+#
+*.la
+*.lai
+
+#
+# Compiled library
+#
+*.so
+*.so.*

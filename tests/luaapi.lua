@@ -43,6 +43,20 @@ local function test_constuctors()
 end
 test_feature('Testing constructors ...', test_constuctors);
 
+local function test_table_constuctors()
+  local vec4 = glm.vec4 {16, 15, 14, 13}
+  local mat4 = glm.mat4 {
+    glm.vec4 {16, 15, 14, 13},
+    glm.vec4 {12, 11, 10,  9},
+    glm.vec3 { 8,  7,  6}, 5,
+    glm.vec4 { 4,  3,  2,  1},
+  };
+
+  print(glm.unpack(vec4));
+  print(glm.unpack(mat4));
+end
+test_feature('Testing table constructors ...', test_table_constuctors);
+
 local function test_ex_constuctors()
   local box = glm.aabb(1, 1, 1, 5, 5, 5);
 
