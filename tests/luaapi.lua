@@ -43,6 +43,13 @@ local function test_constuctors()
 end
 test_feature('Testing constructors ...', test_constuctors);
 
+local function test_mult_unpack()
+  local vec2 = glm.vec2(16, 15);
+
+  print(glm.unpack(vec2, vec2));
+end
+test_feature('Testing glm.unpack ...', test_mult_unpack);
+
 local function test_table_constuctors()
   local vec4 = glm.vec4 {16, 15, 14, 13}
   local mat4 = glm.mat4 {
@@ -184,3 +191,14 @@ local function test_operations()
   print(glm.unpack(glm.translate(mat4, glm.vec3(1, 2, 3))));
 end
 test_feature('Testing operations over vectors and matrices ...', test_operations);
+
+local function test_spheres()
+  local sphere = glm.sphere(1, 1, 1, 5);
+  local mat4 = glm.translate(glm.mat4():identity(), glm.vec3(2, 0, 0));
+
+  print(glm.unpack(sphere));
+  print(sphere:radius());
+  print(sphere:transform(mat4));
+  print(glm.unpack(sphere));
+end
+test_feature('Testing spheres ...', test_spheres);

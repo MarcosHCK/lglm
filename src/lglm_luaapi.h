@@ -171,6 +171,31 @@ int _aabb_contains(lua_State* L);
  *
  */
 int _quat(lua_State* L);
+int _quat_norm(lua_State* L);
+int _quat_normalize(lua_State* L);
+int _quat_dot(lua_State* L);
+int _quat_conjugate(lua_State* L);
+int _quat_inv(lua_State* L);
+int _quat_add(lua_State* L);
+int _quat_sub(lua_State* L);
+int _quat_real(lua_State* L);
+int _quat_imag(lua_State* L);
+int _quat_imagn(lua_State* L);
+int _quat_imaglen(lua_State* L);
+int _quat_angle(lua_State* L);
+int _quat_axis(lua_State* L);
+int _quat_mul(lua_State* L);
+int _quat_mat4(lua_State* L);
+int _quat_mat4t(lua_State* L);
+int _quat_mat3(lua_State* L);
+int _quat_mat3t(lua_State* L);
+int _quat_lerp(lua_State* L);
+int _quat_lerpc(lua_State* L);
+int _quat_slerp(lua_State* L);
+int _quat_look(lua_State* L);
+int _quat_for(lua_State* L);
+int _quat_forp(lua_State* L);
+int _qaut_rotate(lua_State* L);
 
 /*
  * Sphere
@@ -178,6 +203,10 @@ int _quat(lua_State* L);
  *
  */
 int _sphere(lua_State* L);
+int _sphere_transform(lua_State* L);
+int _sphere_merge(lua_State* L);
+int _sphere_intersects(lua_State* L);
+int _sphere_intersects_point(lua_State* L);
 
 /*
  * Camera transforms

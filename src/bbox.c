@@ -22,9 +22,49 @@ typedef vec3 *bbox;
 /* from constructors.c */
 void _get_floats(lua_State* L, int floats_needed, float* floats);
 
+/*
+ * You may ask: Why are you doing this, if is
+ * simpler (and faster, although not much faster)
+ * to add this at '_create_meta'?
+ * Well, since sphere is a extended type, it cannot
+ * be by indexed like vectors, nor does the vector have
+ * sphere methods, so changes done to metatable are
+ * limited to this file, and therefore I don't see any reason
+ * to get this out of here.
+ *
+ */
+static
+int __mt_tweaked = 0;
+
+static
+int aabb_mt__unpack(lua_State* L) {
+  lglm_union_t* union_ = lua_checklglmobject(L, 1, LUA_TBBOX);
+
+  lua_pushnumber(L, union_->mat3_[0][0]);
+  lua_pushnumber(L, union_->mat3_[0][1]);
+  lua_pushnumber(L, union_->mat3_[0][2]);
+  lua_pushnumber(L, union_->mat3_[1][0]);
+  lua_pushnumber(L, union_->mat3_[1][1]);
+  lua_pushnumber(L, union_->mat3_[1][2]);
+return 6;
+}
+
 int _aabb(lua_State* L) {
   lglm_union_t* union_ = lua_newlglmobject(L, LUA_TBBOX);
   _get_floats(L, 6, (float*)(union_));
+
+  if(!__mt_tweaked)
+  {
+    __mt_tweaked = TRUE;
+
+    luaL_getmetatable(L, LUA_SPHERE);
+
+    lua_pushstring(L, "__unpack");
+    lua_pushcfunction(L, aabb_mt__unpack);
+    lua_settable(L, -3);
+
+    lua_pop(L, 1);
+  }
 return 1;
 }
 
