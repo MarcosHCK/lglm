@@ -440,13 +440,16 @@ const luaL_Reg vector_mt[] = {
 void _create_meta(lua_State * L) {
   int mtype;
   const char* typename;
+
   for(mtype = LUA_TGLMANY + 1;mtype < _N_ELEMENTS(lglm_typenames);mtype++)
   {
     typename = lglm_typenames[mtype];
+
     luaL_newmetatable(L, typename);
     luaL_setfuncs(L, vector_mt, 0);
+    lua_pushstring(L, "__name");
     lua_pushstring(L, typename);
-    lua_setfield(L, -2, "__name");
+    lua_settable(L, -3);
     lua_pop(L, 1);
   }
 }

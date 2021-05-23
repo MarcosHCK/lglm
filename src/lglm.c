@@ -280,11 +280,13 @@ return lua_tolglmobject(L, idx, LUA_TSPHERE);
  */
 
 static
-int _unpack(lua_State* L) {
-  int mtype = _checklglmobject_ex(L, 1, LUA_TGLMANY, TRUE);
-  lglm_union_t* union_ = lua_tolglmobject(L, 1, mtype);
+int _unpack_idx(lua_State* L, int idx) {
+  int mtype = _checklglmobject_ex(L, idx, LUA_TGLMANY, TRUE);
+  lglm_union_t* union_ = lua_tolglmobject(L, idx, mtype);
 
-  if _LIKELY(mtype != LUA_TGLMANY)
+  if _UNLIKELY(mtype == LUA_TGLMANY)
+    return 0;
+
   switch(mtype)
   {
     case LUA_TVEC2:
@@ -298,7 +300,6 @@ int _unpack(lua_State* L) {
         lua_pushnumber(L, union_->vec3_[2]);
         return 3;
         break;
-    case LUA_TQUAT:
     case LUA_TVEC4:
         lua_pushnumber(L, union_->vec4_[0]);
         lua_pushnumber(L, union_->vec4_[1]);
@@ -344,17 +345,39 @@ int _unpack(lua_State* L) {
         lua_pushnumber(L, union_->mat4_[3][3]);
         return 16;
         break;
-      case LUA_TBBOX:
-        lua_pushnumber(L, union_->mat3_[0][0]);
-        lua_pushnumber(L, union_->mat3_[0][1]);
-        lua_pushnumber(L, union_->mat3_[0][2]);
-        lua_pushnumber(L, union_->mat3_[1][0]);
-        lua_pushnumber(L, union_->mat3_[1][1]);
-        lua_pushnumber(L, union_->mat3_[1][2]);
-        return 6;
+      default:
+        if(lua_getmetatable(L, idx))
+        {
+          int top = lua_gettop(L) - 1;
+
+          lua_pushstring(L, "__unpack");
+          lua_gettable(L, -2);
+          lua_remove(L, -2);
+
+          if(lua_isnil(L, -1))
+          {
+            lua_pop(L, 1);
+            return 0;
+          }
+
+          lua_pushvalue(L, idx);
+          lua_call(L, 1, LUA_MULTRET);
+          return lua_gettop(L) - top;
+        }
+        return 0;
         break;
   }
 return 0;
+}
+
+static
+int _unpack(lua_State* L) {
+  int i, top = lua_gettop(L);
+  int r = 0;
+
+  for(i = 1;i <= top;i++)
+  r += _unpack_idx(L, i);
+return r;
 }
 
 static
@@ -462,12 +485,43 @@ const struct luaL_Reg lglm_lib[] = {
  *
  */
   LGLM_SYMBOL(quat)
+  LGLM_SYMBOL(quat_norm)
+  LGLM_SYMBOL(quat_normalize)
+  LGLM_SYMBOL(quat_dot)
+  LGLM_SYMBOL(quat_conjugate)
+  LGLM_SYMBOL(quat_inv)
+  LGLM_SYMBOL(quat_add)
+  LGLM_SYMBOL(quat_sub)
+  LGLM_SYMBOL(quat_real)
+  LGLM_SYMBOL(quat_imag)
+  LGLM_SYMBOL(quat_imagn)
+  LGLM_SYMBOL(quat_imaglen)
+  LGLM_SYMBOL(quat_angle)
+  LGLM_SYMBOL(quat_axis)
+  LGLM_SYMBOL(quat_mul)
+  LGLM_SYMBOL(quat_mat4)
+  LGLM_SYMBOL(quat_mat4t)
+  LGLM_SYMBOL(quat_mat3)
+  LGLM_SYMBOL(quat_mat3t)
+  LGLM_SYMBOL(quat_lerp)
+  LGLM_SYMBOL(quat_lerpc)
+  LGLM_SYMBOL(quat_slerp)
+  LGLM_SYMBOL(quat_look)
+  LGLM_SYMBOL(quat_for)
+  LGLM_SYMBOL(quat_forp)
+  LGLM_SYMBOL(qaut_rotate)
 
 /*
  * Sphere
  *
  */
   LGLM_SYMBOL(sphere)
+  LGLM_SYMBOL(sphere_transform)
+  LGLM_SYMBOL(sphere_merge)
+  LGLM_SYMBOL(sphere_intersects)
+  {"sphere_sphere", _sphere_intersects},
+  LGLM_SYMBOL(sphere_intersects_point)
+  {"sphere_point", _sphere_intersects_point},
 
 /*
  * Camera
