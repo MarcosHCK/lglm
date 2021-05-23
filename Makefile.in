@@ -15,6 +15,11 @@
 # along with lglm.  If not, see <http://www.gnu.org/licenses/>.
 #
 PACKAGE_NAME=@PACKAGE_NAME@
+PACKAGE_RELEASE=@PACKAGE_RELEASE@
+PACKAGE_VERSION=@PACKAGE_VERSION@
+PACKAGE_VERSION_MAYOR=@PACKAGE_VERSION_MAYOR@
+PACKAGE_VERSION_MINOR=@PACKAGE_VERSION_MINOR@
+PACKAGE_VERSION_MICRO=@PACKAGE_VERSION_MICRO@
 top_builddir=@top_builddir@
 top_srcdir=@top_srcdir@
 srcdir=@srcdir@
@@ -27,7 +32,7 @@ prefix=@prefix@
 # Compiler flags
 #
 CPPFLAGS=@CPPFLAGS@
-CFLAGS=@CFLAGS@
+CFLAGS=-Isrc/ @CFLAGS@
 LDFLAGS=@LDFLAGS@
 DEFS=@DEFS@
 LIBS=@LIBS@
@@ -39,8 +44,10 @@ LUA_CFLAGS=@LUA_CFLAGS@
 LUA_LIBS=@LUA_LIBS@
 CGLM_CFLAGS=@CGLM_CFLAGS@
 CGLM_LIBS=@CGLM_LIBS@
-SHARED_FLAGS=-shared -rpath $(libdir)
-
+SHARED_FLAGS= -shared \
+						 	-rpath $(libdir) \
+						 	-release $(PACKAGE_RELEASE) \
+						 	-version-info $(PACKAGE_VERSION_MAYOR):$(PACKAGE_VERSION_MINOR):$(PACKAGE_VERSION_MICRO)
 #
 # Some programs we need ...
 #

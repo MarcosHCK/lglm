@@ -16,5 +16,5 @@
  *
  */
 
-#define RELEASE "build"
-#define VERSION "0.0.0.1"
+#define RELEASE "alpha"
+#define VERSION "0.1.0.0"

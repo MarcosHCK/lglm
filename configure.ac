@@ -15,18 +15,54 @@
 # along with lglm.  If not, see <http://www.gnu.org/licenses/>.
 #
 AC_PREREQ([2.69])
+
 m4_define([lglm_VERSION], m4_esyscmd([printf `sed -e 's/^#define VERSION "\([^"]*\)"/\1/p' -e d < ./version.h`]))
+m4_define([lglm_RELEASE], m4_esyscmd([printf `sed -e 's/^#define RELEASE "\([^"]*\)"/\1/p' -e d < ./version.h`]))
+
 AC_INIT([lglm], [lglm_VERSION], [lglm.bugs@hcktm.com], [lglm], [https://www.hcktm.com/lglm/])
 AC_CONFIG_SRCDIR([src/lglm.c])
 AC_LANG([C])
 
+#
+# Configure aclocal path
+#
 AC_CONFIG_MACRO_DIRS([build-aux])
 
-CFLAGS="-Isrc/ $CFLAGS"
-m4_define([lglm_RELEASE], m4_esyscmd([printf `sed -e 's/^#define RELEASE "\([^"]*\)"/\1/p' -e d < ./version.h`]))
+#
+# Setup default cross-compiling
+# environment mechanics
+#
+AC_CANONICAL_BUILD
+AC_CANONICAL_HOST
+AC_CANONICAL_TARGET
+
+#
+# Extract mayor, minor and micro version
+# numbers from version string
+# Also define release type
+#
+m4_define([vernum_pattern],[\(@<:@0-9@:>@*\)])
+
+AC_SUBST([PACKAGE_VERSION_MAYOR])
+PACKAGE_VERSION_MAYOR=$(echo "$PACKAGE_VERSION" | sed -e 's/vernum_pattern\.vernum_pattern\.vernum_pattern\.vernum_pattern/\1/')
+AC_DEFINE_UNQUOTED([PACKAGE_VERSION_MAYOR], ["$PACKAGE_VERSION_MAYOR"])
+AC_SUBST([PACKAGE_VERSION_MINOR])
+PACKAGE_VERSION_MINOR=$(echo "$PACKAGE_VERSION" | sed -e 's/vernum_pattern\.vernum_pattern\.vernum_pattern\.vernum_pattern/\2/')
+AC_DEFINE_UNQUOTED([PACKAGE_VERSION_MINOR], ["$PACKAGE_VERSION_MINOR"])
+AC_SUBST([PACKAGE_VERSION_MICRO])
+PACKAGE_VERSION_MICRO=$(echo "$PACKAGE_VERSION" | sed -e 's/vernum_pattern\.vernum_pattern\.vernum_pattern\.vernum_pattern/\3/')
+AC_DEFINE_UNQUOTED([PACKAGE_VERSION_MICRO], ["$PACKAGE_VERSION_MICRO"])
+AC_SUBST([PACKAGE_VERSION_BUILD])
+PACKAGE_VERSION_BUILD=$(echo "$PACKAGE_VERSION" | sed -e 's/vernum_pattern\.vernum_pattern\.vernum_pattern\.vernum_pattern/\4/')
+AC_DEFINE_UNQUOTED([PACKAGE_VERSION_BUILD], ["$PACKAGE_VERSION_BUILD"])
+
+AC_DEFINE([PACKAGE_RELEASE], ["lglm_RELEASE"])
 AC_SUBST([PACKAGE_RELEASE], [lglm_RELEASE])
 
-# Checks for programs.
+#
+#  Checks for programs we'll
+# need to build
+#
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_INSTALL
@@ -34,8 +70,10 @@ AC_PROG_MAKE_SET
 LT_INIT
 PKG_PROG_PKG_CONFIG
 
+#
+# Select shared flags
+#
 AC_SUBST([SHARED_FLAGS])
-
 case "${host_os}" in
   darwin*)
     SHARED_FLAGS=-dynamiclib
@@ -55,10 +93,12 @@ if test SHARED_FLAGS == ""; then
   AC_MSG_ERROR([Can not guess shared configuration for your system])
 fi
 
+#
+# Do you want to debug? Tell me!
+#
 debugging="no"
-
 AC_ARG_ENABLE(debug,
-              AS_HELP_STRING([--enable-debug-output], [Enable debug output @<:@no@:>@]),
+              AS_HELP_STRING([--enable-debug-output], [Enable debug output @<:@default=no@:>@]),
               [if test "x$enableval" != "xno"; then
                 debugging="yes"
                fi
@@ -68,15 +108,19 @@ if test "x$debugging" == "xno"; then
   CFLAGS="-O2 $CFLAGS"
   LDFLAGS="-s $LDFLAGS"
 else
+  AC_DEFINE([_DEBUG], [1])
   CFLAGS="-g $CFLAGS"
 fi
 
+#
 # Checks for libraries.
-AC_SEARCH_LIBS([pow], [m])
-AC_SEARCH_LIBS([sqrtf], [m])
-AC_SEARCH_LIBS([fabsf], [m])
+#
+AC_CHECK_LIB([m], [pow])
 
+# 
 # Check for libraries using pkg-config
+#
+PKG_CHECK_MODULES([CGLM], [cglm])
 PKG_CHECK_MODULES([LUA], [luajit],,[
   PKG_CHECK_MODULES([LUA], [lua5.3],, [
     PKG_CHECK_MODULES([LUA], [lua5.2],, [
@@ -84,23 +128,30 @@ PKG_CHECK_MODULES([LUA], [luajit],,[
     ])
   ])
 ])
-PKG_CHECK_MODULES([CGLM], [cglm])
 
+#
 # Checks for header files.
+#
 AC_CHECK_HEADERS([stddef.h stdint.h stdlib.h string.h math.h])
 
+#
 # Checks for typedefs, structures, and compiler characteristics.
+#
 AC_C_INLINE
 AC_TYPE_SIZE_T
 AC_TYPE_UINT8_T
 AC_TYPE_UINT16_T
 AC_TYPE_UINT32_T
 
+#
 # Checks for library functions.
+#
 AC_CHECK_FUNCS([memset])
 AC_CHECK_FUNCS([memcpy])
 
-# Produce output
+#
+# Prepare output
+#
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile lglm.pc])
 AC_OUTPUT
